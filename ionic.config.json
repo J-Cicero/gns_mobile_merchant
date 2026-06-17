@@ -1,0 +1,7 @@
+{
+  "name": "gns_mobile_merchant",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
