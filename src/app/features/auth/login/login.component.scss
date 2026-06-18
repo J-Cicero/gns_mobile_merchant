@@ -1,0 +1,173 @@
+/* --- COORDONNÉES ET POSITIONNEMENT MOBILE PREMIUM --- */
+
+ion-content {
+  --background: linear-gradient(135deg, var(--ion-background-color, #0f172a) 0%, #020617 100%);
+}
+
+.auth-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%; // Prend 100% de la largeur de l'appareil
+  padding: 2rem 1.5rem; // Marges naturelles à gauche et à droite pour le mobile
+  box-sizing: border-box;
+  justify-content: flex-start; // Aligne vers le haut pour éviter que le clavier virtuel ne cache tout
+}
+
+/* --- BRANDING (Positionné proprement en haut) --- */
+.brand-section {
+  text-align: center;
+  margin-top: 5vh; // Léger décalage par rapport au haut de l'écran du téléphone
+  margin-bottom: 2rem;
+
+  .premium-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 10px auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    color: white;
+    font-size: 28px;
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+    
+    ion-icon {
+      font-size: 32px;
+    }
+  }
+
+  .brand-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ion-text-color, #ffffff);
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-tagline {
+    font-size: 14px;
+    color: var(--ion-text-color-step-150, #94a3b8);
+    margin-top: 6px;
+  }
+}
+
+/* --- SEGMENT SWITCHER (Prend toute la largeur de manière fluide) --- */
+.role-selector-container {
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  .premium-segment {
+    background: var(--ion-item-background, #1e293b);
+    border-radius: 12px;
+    padding: 3px;
+    width: 100%; // S'étire proprement sur tout l'écran du smartphone
+    
+    ion-segment-button {
+      --color: var(--ion-text-color-step-150, #94a3b8);
+      --color-checked: #ffffff;
+      --indicator-color: var(--ion-color-primary);
+      --border-radius: 9px;
+      font-weight: 600;
+      font-size: 14px;
+      min-height: 38px;
+    }
+  }
+}
+
+/* --- FORMULAIRE ET CHAMPS (Largeur 100% Mobile) --- */
+.card-form-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%; // Occupe tout l'espace horizontal sur le téléphone
+
+  .input-glow-wrapper {
+    background: var(--ion-item-background, #1e293b);
+    border-radius: 14px;
+    margin-bottom: 0.9rem; // Espacement compact et pro
+    border: 1px solid var(--ion-border-color);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+
+    &:focus-within {
+      border-color: var(--ion-color-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      
+      .input-icon {
+        color: var(--ion-color-primary);
+      }
+    }
+  }
+
+  .premium-input {
+    --background: transparent;
+    --color: var(--ion-text-color, #ffffff);
+    --padding-start: 0.7rem;
+    width: 100%;
+    
+    .input-icon {
+      font-size: 19px;
+      color: #64748b;
+      margin-top: 12px;
+      margin-right: 6px;
+    }
+
+    ion-input {
+      --padding-top: 10px;
+      --padding-bottom: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  }
+
+  /* --- LIEN OUBLIÉ (Style cohérent) --- */
+  .forgot-link-container {
+    text-align: right;
+    margin-bottom: 1.5rem;
+
+    .forgot-link {
+      font-size: 13px;
+      color: var(--ion-color-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+  }
+  
+  /* --- BOUTON PRINCIPAL (Largeur 100% et bien calé) --- */
+  .premium-btn {
+    --background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --color: var(--ion-text-color, #ffffff);
+    --border-radius: 14px;
+    height: 50px; // Épaisseur parfaite pour un clic au doigt sur smartphone
+    width: 100%;
+    margin-top: 0.8rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    
+    span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+  }
+
+  /* --- LIEN DE BASCULE EN BAS --- */
+  .switch-auth-link {
+    text-align: center;
+    margin-top: 1.8rem;
+
+    p {
+      color: var(--ion-text-color-step-150, #94a3b8);
+      font-size: 14px;
+      margin: 0;
+      
+      a {
+        color: var(--ion-color-primary);
+        font-weight: 700;
+        text-decoration: none;
+        margin-left: 4px;
+      }
+    }
+  }
+}

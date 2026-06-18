@@ -1,0 +1,60 @@
+<ion-content scroll-y="false" class="premium-auth-content">
+  <div class="auth-wrapper">
+    
+    <div class="brand-section">
+      <div class="premium-logo">
+        <ion-icon name="flash"></ion-icon>
+      </div>
+      <h1 class="brand-title">Stud<span>Cash</span></h1>
+      <p class="brand-tagline">Gérez votre commerce</p> <!-- Updated tagline -->
+    </div>
+
+    <div class="card-form-section">
+      
+      <div class="input-glow-wrapper">
+        <ion-item class="premium-input" lines="none">
+          <ion-icon name="person-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input
+            type="email"
+            label="Email"
+            labelPlacement="floating"
+            [(ngModel)]="credentials.email">
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <div class="input-glow-wrapper">
+        <ion-item class="premium-input" lines="none">
+          <ion-icon name="lock-closed-outline" slot="start" class="input-icon"></ion-icon>
+          <ion-input
+            type="password"
+            label="Mot de passe"
+            labelPlacement="floating"
+            [(ngModel)]="credentials.password">
+          </ion-input>
+        </ion-item>
+      </div>
+
+      <div class="forgot-link-container">
+        <a class="forgot-link">Mot de passe oublié ?</a>
+      </div>
+
+      <div *ngIf="errorMessage" class="premium-error-box">
+        <ion-icon name="alert-circle"></ion-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <ion-button expand="block" class="premium-btn" (click)="onLogin()" [disabled]="isLoading">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Se connecter <ion-icon name="arrow-forward" slot="end"></ion-icon></span>
+      </ion-button>
+
+      <!-- Removed registration link for merchant app -->
+      <!-- <div class="switch-auth-link">
+        <p>Pas encore de compte ? <a (click)="goToRegister()" style="cursor: pointer;">Créer un compte</a></p>
+      </div> -->
+
+    </div>
+
+  </div>
+</ion-content>

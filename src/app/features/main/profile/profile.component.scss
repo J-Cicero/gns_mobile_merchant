@@ -1,0 +1,72 @@
+/* Profile component styles */
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.brand-icon {
+  font-size: 3rem;
+  color: var(--ion-color-primary);
+  margin-right: 0.5rem;
+}
+
+.brand-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--ion-text-color);
+}
+
+.role-note {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ion-text-color-step-600);
+  margin-bottom: 1rem;
+}
+
+.item-native {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.item-inner {
+  padding-inline-end: 0;
+}
+
+.theme-toggle-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.logout-section {
+  padding: 16px;
+  text-align: center;
+}
+
+.logout-btn {
+  --background: var(--ion-color-danger-tint);
+  --color: var(--ion-color-danger);
+  --border-radius: 12px;
+  font-weight: bold;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
