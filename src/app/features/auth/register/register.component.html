@@ -1,0 +1,124 @@
+<ion-content class="bg-slate-50 dark:bg-slate-900">
+  <div class="flex flex-col min-h-screen px-6 py-12">
+    <!-- Header -->
+    <div class="mb-10 text-center animate-fade-in-up">
+      <div class="w-16 h-16 mx-auto bg-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30">
+        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l9-5-9-5-9 5 9 5z" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Bienvenue sur GNS Marchand</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Créez votre compte marchand en quelques secondes.</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start animate-fade-in">
+      <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-sm font-bold text-red-700 dark:text-red-400">{{ errorMessage }}</p>
+    </div>
+
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()" class="space-y-5 flex-1 animate-fade-in-up" style="animation-delay: 100ms;">
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nom</label>
+          <input type="text" [(ngModel)]="registrationData.lastName" name="lastName" required
+            class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+            placeholder="Ex: SMITH">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Prénom</label>
+          <input type="text" [(ngModel)]="registrationData.firstName" name="firstName" required
+            class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+            placeholder="Ex: John">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Email</label>
+        <input type="email" [(ngModel)]="registrationData.email" name="email" required
+          class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+          placeholder="marchand@exemple.com">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Téléphone</label>
+        <input type="tel" [(ngModel)]="registrationData.phoneNumber" name="phoneNumber" required
+          class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+          placeholder="+228 90 00 00 00">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Mot de passe</label>
+        <input type="password" [(ngModel)]="registrationData.password" name="password" required
+          class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+          placeholder="••••••••">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nom Commercial</label>
+        <input type="text" [(ngModel)]="registrationData.businessName" name="businessName" required
+          class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+          placeholder="Ex: Ma Boutique SARL">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Numéro d'Enregistrement (Optionnel)</label>
+        <input type="text" [(ngModel)]="registrationData.registrationNumber" name="registrationNumber"
+          class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+          placeholder="Ex: RC 12345">
+      </div>
+
+      <div class="mt-6 border-t border-slate-200 dark:border-slate-700 pt-6">
+        <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-4 uppercase tracking-wider">Informations Bancaires</h3>
+        
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Banque</label>
+            <select [(ngModel)]="registrationData.bankTrackingId" name="bankTrackingId"
+              class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white">
+              <option value="">Sélectionner une banque (Optionnel)</option>
+              <option *ngFor="let banque of banques" [value]="banque.trackingId">{{ banque.name }}</option>
+            </select>
+          </div>
+
+          <div *ngIf="registrationData.bankTrackingId">
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Numéro de Compte</label>
+            <input type="text" [(ngModel)]="registrationData.accountNumber" name="accountNumber" required
+              class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" 
+              placeholder="Ex: 0123456789">
+          </div>
+
+          <div *ngIf="registrationData.bankTrackingId">
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5 ml-1">RIB (Image ou PDF)</label>
+            <input type="file" (change)="onRibSelected($event)" accept=".pdf,image/*" required
+              class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+          </div>
+        </div>
+      </div>
+      <div class="pt-6">
+        <button type="submit" [disabled]="isSubmitting" 
+          class="w-full py-4 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98] disabled:opacity-70 flex justify-center items-center">
+          <svg *ngIf="isSubmitting" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span *ngIf="!isSubmitting">Créer mon compte</span>
+          <span *ngIf="isSubmitting">Création en cours...</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-8 text-center">
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        Déjà un compte ? 
+        <a (click)="goToLogin()" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline" style="cursor: pointer;">Connectez-vous</a>
+      </p>
+    </div>
+  </div>
+</ion-content>

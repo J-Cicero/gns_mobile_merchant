@@ -23,10 +23,9 @@ export class LoginComponent {
     addIcons({ personOutline, lockClosedOutline, flash, arrowForward, alertCircle });
   }
 
-  // Merchants do not have a direct registration flow from the app in this initial version.
-  // goToRegister() {
-  //   this.navCtrl.navigateRoot('/onboarding/registration'); 
-  // }
+  goToRegister() {
+    this.router.navigate(['/auth/register']);
+  }
 
   onLogin() {
     this.isLoading = true;

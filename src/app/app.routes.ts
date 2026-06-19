@@ -4,12 +4,16 @@ import { AuthGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'main/dashboard',
+    redirectTo: 'auth/login',
     pathMatch: 'full'
   },
   {
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'auth/register',
+    loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
     path: 'main',
@@ -26,6 +30,10 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadComponent: () => import('./features/main/profile/profile.component').then(m => m.ProfileComponent)
+      },
+      {
+        path: 'catalogue',
+        loadComponent: () => import('./features/main/catalogue/catalogue.component').then(m => m.CatalogueComponent)
       },
       // Add other main merchant routes here as needed
       {
