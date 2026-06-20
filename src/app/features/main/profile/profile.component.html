@@ -59,7 +59,7 @@
                 <ion-radio slot="end" [value]="boutique.trackingId" [(ngModel)]="selectedBoutiqueId" (ionSelect)="onBoutiqueChange($event)"></ion-radio>
               </ion-item>
             </ion-list>
-            <ion-button expand="block" fill="outline">
+            <ion-button expand="block" fill="outline" (click)="openAddBoutiqueModal()">
               <ion-icon slot="start" name="add-outline"></ion-icon>
               Ajouter une nouvelle boutique
             </ion-button>
@@ -101,6 +101,42 @@
       </div>
 
     </div>
-
   </div>
+
+  <!-- Add Boutique Modal -->
+  <ion-modal [isOpen]="isAddBoutiqueModalOpen" (didDismiss)="closeAddBoutiqueModal()">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+          <ion-title class="font-extrabold text-slate-900 dark:text-white">Nouvelle Boutique</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeAddBoutiqueModal()" class="text-slate-500 font-bold">Fermer</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="bg-slate-50 dark:bg-slate-900 px-6 py-6">
+        <div class="space-y-6">
+          <div *ngIf="errorMessage" class="p-4 bg-red-50 text-red-700 font-bold text-sm rounded-xl">
+            {{ errorMessage }}
+          </div>
+          
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nom de la boutique</label>
+            <input type="text" [(ngModel)]="newBoutique.name" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Ex: Mon Super Store">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Description</label>
+            <textarea [(ngModel)]="newBoutique.description" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Que vendez-vous ?"></textarea>
+          </div>
+
+          <button (click)="submitNewBoutique()" [disabled]="isSubmittingBoutique" class="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center">
+            <span *ngIf="!isSubmittingBoutique">Créer la boutique</span>
+            <div *ngIf="isSubmittingBoutique" class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

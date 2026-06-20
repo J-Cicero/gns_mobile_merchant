@@ -10,15 +10,16 @@ import { TransactionService } from '../../../core/services/transaction.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Boutique } from '../../../core/models/boutique.model';
 import { TransactionRequest } from '../../../core/models/transaction.model';
-import { NgxQrcodeStylingComponent } from 'ngx-qrcode-styling'; // Corrected import
-import { environment } from '../../../../environments/environment'; // Import environment
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+import { NgxQrcodeStylingComponent } from 'ngx-qrcode-styling'; // Optional if still needed
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-caisse',
   templateUrl: './caisse.component.html',
   styleUrls: ['./caisse.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, NgxQrcodeStylingComponent] // Corrected import
+  imports: [CommonModule, FormsModule, IonicModule, ZXingScannerModule]
 })
 export class CaisseComponent implements OnInit, ViewWillEnter {
 
@@ -31,6 +32,10 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
   isLoading = false;
   errorMessage = '';
 
+  hasDevices: boolean = false;
+  hasPermission: boolean = false;
+  isScanning: boolean = false;
+
   constructor(
     private router: Router,
     private alertController: AlertController,
@@ -42,8 +47,6 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
   }
 
   ngOnInit() {
-    // ngOnInit is called once when the component is initialized.
-    // For data that needs to refresh when entering the view, use ionViewWillEnter.
   }
 
   ionViewWillEnter() {
@@ -78,12 +81,45 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
     });
   }
 
-  async generatePaymentQrCode() {
+  startScan() {
     if (!this.selectedBoutiqueId || !this.amount || this.amount <= 0) {
-      await this.presentAlert('Erreur', 'Veuillez sélectionner une boutique et saisir un montant valide.');
+      this.presentAlert('Erreur', 'Veuillez sélectionner une boutique et saisir un montant valide.');
       return;
     }
+    this.isScanning = true;
+  }
 
+  stopScan() {
+    this.isScanning = false;
+  }
+
+  onCodeResult(resultString: string) {
+    this.isScanning = false;
+    try {
+      // Assuming the student's QR is a JSON or just a tracking ID string.
+      // If it's the JSON payload from student app: {"type":"PAYMENT","senderTrackingId":"..."}
+      let studentTrackingId = resultString;
+      if (resultString.startsWith('{')) {
+        const payload = JSON.parse(resultString);
+        studentTrackingId = payload.senderTrackingId || payload.studentTrackingId;
+      }
+
+      this.processPayment(studentTrackingId);
+    } catch (e) {
+      // If not JSON, assume it's directly the ID
+      this.processPayment(resultString);
+    }
+  }
+
+  onHasDevices(has: boolean) {
+    this.hasDevices = has;
+  }
+
+  onHasPermission(has: boolean) {
+    this.hasPermission = has;
+  }
+
+  async processPayment(studentTrackingId: string) {
     this.isLoading = true;
     const merchantId = this.authService.getCurrentMerchantId();
     if (!merchantId) {
@@ -93,41 +129,29 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
     }
 
     const transactionRequest: TransactionRequest = {
-      senderTrackingId: merchantId, // Merchant is the sender in this context (initiating payment request)
-      receiverTrackingId: this.selectedBoutiqueId, // Boutique is the receiver
-      amount: this.amount,
-      // No password needed here, as this creates a PENDING transaction for the student to pay.
-      // isCommissionPaid and isRetry should be defaulted by backend.
+      senderTrackingId: studentTrackingId, // Student pays
+      receiverTrackingId: this.selectedBoutiqueId!, // Boutique receives
+      amount: this.amount!,
+      password: '' // Usually requires a password/PIN from the student, but since merchant scans, maybe no PIN, or the backend must handle this.
     };
 
-    // Assuming the backend endpoint for QR payment initiation is different or the createPayment needs a flag
-    // For now, I'll use initiatePayment and assume backend sets status to PENDING if no password
-    // Backend's createPayment immediately validates. Need a specific backend endpoint for PENDING transactions.
-    // Given the demo, let's make it simple: `initiatePayment` is for actual payment, here we generate QR data.
-    // This implies a new backend endpoint `POST /transactions/initiate-qr-payment` which returns a PENDING transaction ID.
-    // For now, let's assume `initiatePayment` will be called by the student. Here we just generate QR data.
-    // If the backend `createPayment` sets status to VALIDE immediately, this part of the flow needs careful backend re-design.
-
-    // TEMPORARY: Just generate QR data with a dummy transaction ID for demo purposes, 
-    // without creating a backend transaction yet, as createPayment validates immediately.
-    this.transactionTrackingId = 'dummy-txn-' + Math.random().toString(36).substring(7);
-
-    this.qrData = JSON.stringify({
-      type: 'PAYMENT_REQUEST',
-      boutiqueId: this.selectedBoutiqueId,
-      amount: this.amount,
-      // transactionId: this.transactionTrackingId, // Will be real ID from backend later
-      callbackUrl: `${environment.apiUrl}/transactions/pay-by-qr` // Student app would call this
+    this.transactionService.createPayment(transactionRequest).subscribe({
+      next: async (res) => {
+        this.isLoading = false;
+        await this.presentAlert('Succès', 'Paiement effectué avec succès !');
+        this.resetPayment();
+        this.router.navigate(['/main/dashboard']);
+      },
+      error: async (err) => {
+        this.isLoading = false;
+        await this.presentAlert('Erreur', 'Erreur lors du paiement: ' + (err.error?.message || err.message));
+      }
     });
-
-    this.isLoading = false;
-    await this.presentAlert('QR Code Généré', 'Le QR code est prêt pour le paiement.');
   }
 
   resetPayment() {
     this.amount = null;
-    this.qrData = '';
-    this.transactionTrackingId = null;
+    this.isScanning = false;
     this.errorMessage = '';
   }
 

@@ -8,6 +8,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { MerchantService } from '../../../core/services/merchant.service';
 import { MerchantResponse } from '../../../core/models/merchant.model';
 import { Boutique } from '../../../core/models/boutique.model';
+import { addIcons } from 'ionicons';
+import { addOutline, storefontOutline, locationOutline, closeOutline } from 'ionicons/icons';
 
 
 @Component({
@@ -25,13 +27,21 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   isDarkMode = false;
   isLoading = false;
   errorMessage = '';
+  isAddBoutiqueModalOpen = false;
+  newBoutique: Partial<Boutique> = {
+    name: '',
+    description: ''
+  };
+  isSubmittingBoutique = false;
 
   constructor(
     private router: Router,
     private themeService: ThemeService,
     private authService: AuthService,
-    private merchantService: MerchantService // Inject MerchantService
-  ) { }
+    private merchantService: MerchantService
+  ) {
+    addIcons({ addOutline, storefontOutline, locationOutline, closeOutline });
+  }
 
   ngOnInit() {
     this.isDarkMode = this.themeService.isDark;
@@ -96,5 +106,48 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   logout() {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
+  }
+
+  openAddBoutiqueModal() {
+    this.newBoutique = { name: '', description: '' };
+    this.errorMessage = '';
+    this.isAddBoutiqueModalOpen = true;
+  }
+
+  closeAddBoutiqueModal() {
+    this.isAddBoutiqueModalOpen = false;
+  }
+
+  submitNewBoutique() {
+    if (!this.newBoutique.name || !this.newBoutique.description) {
+      this.errorMessage = 'Veuillez remplir tous les champs.';
+      return;
+    }
+
+    const merchantId = this.authService.getCurrentMerchantId();
+    if (!merchantId) return;
+
+    this.isSubmittingBoutique = true;
+    this.errorMessage = '';
+
+    const request: Boutique = {
+      trackingId: '', // Set by backend
+      name: this.newBoutique.name,
+      description: this.newBoutique.description,
+      kycStatus: 'PENDING',
+      merchantTrackingId: merchantId
+    };
+
+    this.merchantService.createBoutique(request).subscribe({
+      next: (boutique) => {
+        this.isSubmittingBoutique = false;
+        this.closeAddBoutiqueModal();
+        this.loadBoutiques(merchantId); // Refresh list
+      },
+      error: (err) => {
+        this.isSubmittingBoutique = false;
+        this.errorMessage = err.error?.message || 'Erreur lors de la création de la boutique.';
+      }
+    });
   }
 }

@@ -18,6 +18,7 @@ export const routes: Routes = [
   {
     path: 'main',
     canActivate: [AuthGuard],
+    loadComponent: () => import('./features/main/tabs/tabs.component').then(m => m.TabsComponent),
     children: [
       {
         path: 'dashboard',
@@ -35,7 +36,6 @@ export const routes: Routes = [
         path: 'catalogue',
         loadComponent: () => import('./features/main/catalogue/catalogue.component').then(m => m.CatalogueComponent)
       },
-      // Add other main merchant routes here as needed
       {
         path: '',
         redirectTo: 'dashboard',

@@ -11,16 +11,61 @@
     
     <!-- Placeholder for product listing -->
     <div class="mt-8">
-      <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-4">Mes Produits</h2>
-      <ion-list>
-        <ion-item>
-          <ion-label>Produit Exemple 1</ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-label>Produit Exemple 2</ion-label>
-        </ion-item>
-      </ion-list>
-      <ion-button expand="block" class="mt-4">Ajouter un nouveau produit</ion-button>
+      <div *ngIf="isLoading" class="flex justify-center py-8">
+        <ion-spinner></ion-spinner>
+      </div>
+      
+      <div *ngIf="!isLoading && produits.length === 0" class="text-center py-8 text-slate-500">
+        Aucun produit dans le catalogue.
+      </div>
+
+      <div *ngIf="!isLoading && produits.length > 0" class="space-y-4">
+        <div *ngFor="let prod of produits" class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white">{{ prod.name }}</h3>
+            <p class="text-xs text-slate-500">{{ prod.description }}</p>
+          </div>
+          <div class="text-right">
+            <span class="font-black text-indigo-600 dark:text-indigo-400">{{ prod.price | number:'1.0-0':'fr-FR' }} FCFA</span>
+            <p class="text-[10px] text-slate-400 mt-1">Stock: {{ prod.stock }}</p>
+          </div>
+        </div>
+      </div>
+
+      <ion-button expand="block" class="mt-8" (click)="openAddProductModal()">Ajouter un nouveau produit</ion-button>
     </div>
   </div>
+
+  <!-- Add Product Modal -->
+  <ion-modal [isOpen]="isAddProductModalOpen" (didDismiss)="closeAddProductModal()">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+          <ion-title class="font-extrabold text-slate-900 dark:text-white">Nouveau Produit</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeAddProductModal()" class="text-slate-500 font-bold">Fermer</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="bg-slate-50 dark:bg-slate-900 px-6 py-6">
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nom du produit</label>
+            <input type="text" [(ngModel)]="newProduct.name" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Prix (FCFA)</label>
+            <input type="number" [(ngModel)]="newProduct.price" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Stock initial</label>
+            <input type="number" [(ngModel)]="newProduct.stock" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+          </div>
+          <button (click)="submitNewProduct()" [disabled]="isSubmittingProduct || !newProduct.name || !newProduct.price" class="w-full py-4 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl transition-all">
+            Créer le produit
+          </button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
