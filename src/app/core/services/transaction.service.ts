@@ -36,4 +36,17 @@ export class TransactionService {
   getGlobalStats(): Observable<any> { // Assuming a stats model if needed
     return this.http.get<any>(`${this.apiUrl}/stats/global`);
   }
+
+
+  findByTrackingId(trackingId: any): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${trackingId}`);
+  }
+
+  findByBoutiqueId(boutiqueId: any): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/boutique/${boutiqueId}`);
+  }
+
+  findByStudentId(studentId: any): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/student/${studentId}`);
+  }
 }
