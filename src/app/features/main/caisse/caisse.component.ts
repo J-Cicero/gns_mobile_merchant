@@ -111,8 +111,8 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
     }
   }
 
-  onHasDevices(has: boolean) {
-    this.hasDevices = has;
+  onHasDevices(devices: MediaDeviceInfo[]) {
+    this.hasDevices = devices && devices.length > 0;
   }
 
   onHasPermission(has: boolean) {
