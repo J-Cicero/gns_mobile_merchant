@@ -9,7 +9,7 @@ import { MerchantService } from '../../../core/services/merchant.service';
 import { MerchantResponse } from '../../../core/models/merchant.model';
 import { Boutique } from '../../../core/models/boutique.model';
 import { addIcons } from 'ionicons';
-import { addOutline, storefontOutline, locationOutline, closeOutline } from 'ionicons/icons';
+import { addOutline, storefrontOutline, locationOutline, closeOutline } from 'ionicons/icons';
 
 
 @Component({
@@ -40,7 +40,7 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
     private authService: AuthService,
     private merchantService: MerchantService
   ) {
-    addIcons({ addOutline, storefontOutline, locationOutline, closeOutline });
+    addIcons({ addOutline, storefrontOutline, locationOutline, closeOutline });
   }
 
   ngOnInit() {

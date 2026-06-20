@@ -135,14 +135,14 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
       password: '' // Usually requires a password/PIN from the student, but since merchant scans, maybe no PIN, or the backend must handle this.
     };
 
-    this.transactionService.createPayment(transactionRequest).subscribe({
-      next: async (res) => {
+    this.transactionService.initiatePayment(transactionRequest).subscribe({
+      next: async (res: any) => {
         this.isLoading = false;
         await this.presentAlert('Succès', 'Paiement effectué avec succès !');
         this.resetPayment();
         this.router.navigate(['/main/dashboard']);
       },
-      error: async (err) => {
+      error: async (err: any) => {
         this.isLoading = false;
         await this.presentAlert('Erreur', 'Erreur lors du paiement: ' + (err.error?.message || err.message));
       }

@@ -72,6 +72,7 @@ export class CatalogueComponent implements OnInit, ViewWillEnter {
       description: this.newProduct.description || '',
       price: this.newProduct.price,
       stock: this.newProduct.stock || 0,
+      isAvailable: true,
       boutiqueTrackingId: selectedBoutiqueId
     };
 
