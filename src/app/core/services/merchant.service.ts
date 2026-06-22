@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MerchantResponse, MerchantRequest } from '../models/merchant.model';
-import { Boutique, Produit } from '../models/boutique.model'; // Using Boutique as defined in student app
+import { Boutique, Produit } from '../models/boutique.model';
+import { catchError, map } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { LiquidationRequest, LiquidationResponse } from '../models/liquidation.model';
 import { ProductRequest, ProductResponse } from '../models/product.model';
 
@@ -29,7 +31,7 @@ export class MerchantService {
 
   registerMerchant(request: MerchantRequest, ribFile?: File): Observable<MerchantResponse> {
     const formData = new FormData();
-    formData.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
+    formData.append('merchant', new Blob([JSON.stringify(request)], { type: 'application/json' }));
     
     if (ribFile) {
       formData.append('rib', ribFile);
@@ -59,18 +61,33 @@ export class MerchantService {
     return this.http.post<LiquidationResponse>(`${this.apiUrl}/liquidations`, request);
   }
 
-  createBoutique(request: Boutique, ribFile?: File): Observable<Boutique> {
-    const formData = new FormData();
-    formData.append('request', new Blob([JSON.stringify(request)], { type: 'application/json' }));
-    if (ribFile) {
-      formData.append('rib', ribFile);
-    }
-    return this.http.post<Boutique>(`${this.apiUrl}/boutiques`, formData);
+  createBoutique(request: Boutique): Observable<Boutique> {
+    return this.http.post<Boutique>(`${this.apiUrl}/boutiques`, request);
+  }
+
+  hasBoutique(merchantId: string): Observable<boolean> {
+    return this.getBoutiquesByMerchant(merchantId).pipe(
+      map(boutiques => boutiques && boutiques.length > 0)
+    );
   }
 
 
   getBoutiquesByMerchant(merchantId: string): Observable<Boutique[]> {
-    return this.http.get<Boutique[]>(`${this.apiUrl}/boutiques/merchant/${merchantId}`);
+    return this.http.get<any>(`${this.apiUrl}/boutiques/merchant/${merchantId}`).pipe(
+      map(res => {
+        // The backend returns a Page structure (res.content)
+        if (res && res.content) {
+          return res.content;
+        }
+        return res; // Fallback if it's already an array
+      }),
+      catchError(err => {
+        if (err.status === 404) {
+          return of([]);
+        }
+        throw err;
+      })
+    );
   }
 
   getBoutiqueById(trackingId: string): Observable<Boutique> {

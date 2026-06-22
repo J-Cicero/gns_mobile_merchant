@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ViewWillEnter } from '@ionic/angular';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { trendingUpOutline, walletOutline, checkmarkCircleOutline, locationOutline, navigateOutline, personOutline, flash } from 'ionicons/icons';
 import { MerchantService } from '../../../core/services/merchant.service';
@@ -38,7 +38,8 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
   constructor(
     private merchantService: MerchantService,
     private transactionService: TransactionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     addIcons({ trendingUpOutline, walletOutline, checkmarkCircleOutline, locationOutline, navigateOutline, personOutline, flash });
   }
@@ -84,8 +85,7 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
                 this.isLoading = false;
               }
             } else {
-              this.errorMessage = 'Aucune boutique trouvée pour ce marchand.';
-              this.isLoading = false;
+              this.router.navigate(['/main/create-boutique']);
             }
           },
           error: (err) => {

@@ -1,0 +1,84 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="bg-slate-900 text-white">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/main/dashboard" color="light"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="font-bold text-white tracking-wide">Liquidation</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-slate-900 custom-bg">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="px-5 py-6">
+    <!-- KPI Card -->
+    <div class="kpi-card mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold tracking-wider text-slate-300 uppercase">Montant Disponible</h2>
+        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+          <ion-icon name="wallet-outline" class="text-xl text-blue-400"></ion-icon>
+        </div>
+      </div>
+      <div class="flex items-end">
+        <span class="text-4xl font-black text-white tracking-tight">{{ montantDisponible | number:'1.0-0':'fr-FR' }}</span>
+        <span class="text-lg font-bold text-slate-400 ml-2 mb-1">FCFA</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mb-8">
+      <button 
+        (click)="requestLiquidation()" 
+        [disabled]="isSubmitting || montantDisponible <= 0 || !selectedBoutiqueId"
+        class="w-full py-4 rounded-xl font-bold text-white transition-all duration-300 shadow-lg flex justify-center items-center"
+        [ngClass]="(isSubmitting || montantDisponible <= 0 || !selectedBoutiqueId) ? 'bg-slate-700 text-slate-400 cursor-not-allowed border border-slate-600' : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30 active:scale-95'">
+        <ion-spinner *ngIf="isSubmitting" name="crescent" class="mr-2 w-5 h-5"></ion-spinner>
+        <span *ngIf="!isSubmitting">Demander Liquidation</span>
+      </button>
+      <p *ngIf="montantDisponible <= 0" class="text-center text-xs text-slate-500 mt-3 font-medium">
+        <ion-icon name="alert-circle-outline" class="inline align-text-bottom mr-1"></ion-icon>
+        Le solde doit être supérieur à 0 pour liquider.
+      </p>
+    </div>
+
+    <!-- Transactions List -->
+    <div>
+      <h3 class="text-lg font-bold text-white mb-4 tracking-wide">Transactions en attente</h3>
+      
+      <div *ngIf="isLoading" class="flex justify-center py-8">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+      </div>
+
+      <div *ngIf="!isLoading && pendingTransactions.length === 0" class="bg-slate-800 border border-slate-700 rounded-xl p-8 text-center">
+        <ion-icon name="time-outline" class="text-4xl text-slate-600 mb-2"></ion-icon>
+        <p class="text-slate-400 font-medium">Aucune transaction récente.</p>
+      </div>
+
+      <div *ngIf="!isLoading && pendingTransactions.length > 0" class="space-y-3">
+        <div *ngFor="let tx of pendingTransactions" class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
+          <div>
+            <p class="font-bold text-white text-sm">{{ tx.senderName || 'Client Inconnu' }}</p>
+            <p class="text-xs text-slate-400 font-medium mt-1">{{ tx.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+          </div>
+          
+          <div class="text-right">
+            <p class="font-black text-white text-base">{{ tx.amount | number:'1.0-0':'fr-FR' }} FCFA</p>
+            
+            <div class="mt-1.5 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                 [ngClass]="{
+                   'bg-amber-500/10 text-amber-500 border border-amber-500/20': tx.status === 'EN_ATTENTE',
+                   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20': tx.status === 'VALIDE',
+                   'bg-slate-700 text-slate-300 border border-slate-600': tx.status !== 'EN_ATTENTE' && tx.status !== 'VALIDE'
+                 }">
+                 <ion-icon *ngIf="tx.status === 'VALIDE'" name="checkmark-circle-outline" class="mr-1"></ion-icon>
+                 <ion-icon *ngIf="tx.status === 'EN_ATTENTE'" name="time-outline" class="mr-1"></ion-icon>
+                 {{ tx.status }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

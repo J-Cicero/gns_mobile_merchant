@@ -46,7 +46,7 @@
         
         <div class="relative z-10">
           <div class="flex justify-between items-center mb-6">
-            <span class="text-purple-100 font-medium text-sm tracking-widest uppercase">Quota Restant</span>
+            <span class="text-purple-100 font-medium text-sm tracking-widest uppercase">Solde Actuel</span>
             <span class="px-2.5 py-1 bg-white/20 rounded-full text-xs font-bold border border-white/20">
               {{ selectedBoutique.kycStatus }}
             </span>
@@ -56,7 +56,7 @@
             <h2 class="text-4xl font-black tracking-tight flex items-baseline">
               {{ quotaRestant | number:'1.0-0':'fr-FR' }} <span class="text-lg font-bold ml-1 text-purple-200">FCFA</span>
             </h2>
-            <p class="text-xs text-purple-200 mt-1">sur {{ quotaInitial | number:'1.0-0':'fr-FR' }} FCFA</p>
+            <p class="text-xs text-purple-200 mt-1">Quota Limite: {{ quotaInitial | number:'1.0-0':'fr-FR' }} FCFA</p>
           </div>
 
           <div class="flex justify-between items-end">

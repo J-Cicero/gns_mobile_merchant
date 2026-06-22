@@ -1,0 +1,40 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Créer votre boutique</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="empty-state">
+    <ion-icon name="storefront-outline" color="primary"></ion-icon>
+    <h2>Bienvenue !</h2>
+    <p>Il semble que vous n'ayez pas encore de boutique. Veuillez en créer une pour accéder à votre tableau de bord.</p>
+  </div>
+
+  <div class="form-container">
+    <ion-item class="custom-input">
+      <ion-label position="floating">Nom de la boutique</ion-label>
+      <ion-input type="text" [(ngModel)]="newBoutique.name"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-input">
+      <ion-label position="floating">Description</ion-label>
+      <ion-textarea [(ngModel)]="newBoutique.description" rows="3"></ion-textarea>
+    </ion-item>
+
+    <ion-text color="danger" *ngIf="errorMessage">
+      <p class="error-msg">{{ errorMessage }}</p>
+    </ion-text>
+
+    <ion-button expand="block" class="submit-btn" (click)="submitBoutique()" [disabled]="isLoading">
+      <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+      <span *ngIf="!isLoading">Créer ma boutique</span>
+      <ion-icon slot="end" name="add-circle-outline" *ngIf="!isLoading"></ion-icon>
+    </ion-button>
+  </div>
+</ion-content>

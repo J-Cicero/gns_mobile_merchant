@@ -130,11 +130,10 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
     this.isSubmittingBoutique = true;
     this.errorMessage = '';
 
-    const request: Boutique = {
-      trackingId: '', // Set by backend
+    const request: any = {
       name: this.newBoutique.name,
       description: this.newBoutique.description,
-      kycStatus: 'PENDING',
+      kycStatus: 'EN_ATTENTE',
       merchantTrackingId: merchantId
     };
 

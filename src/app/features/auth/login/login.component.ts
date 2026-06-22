@@ -37,8 +37,8 @@ export class LoginComponent {
     }).subscribe({
       next: (res) => {
         this.isLoading = false;
-        // For merchant app, simply navigate to dashboard if login is successful
-        this.router.navigate(['/main/dashboard']);
+        // Navigate to select-boutique to handle multiple boutiques or no boutique
+        this.router.navigate(['/main/select-boutique']);
       },
       error: () => {
         this.isLoading = false;

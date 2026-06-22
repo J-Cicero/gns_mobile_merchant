@@ -10,6 +10,10 @@
  */
 
 /* Core CSS required for Ionic components to work properly */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import "@ionic/angular/css/core.css";
 
 /* Basic CSS for apps built with Ionic */
@@ -33,5 +37,94 @@
  */
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+@import "@ionic/angular/css/palettes/dark.class.css";
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+/* =========================================================================
+ * 🌟 GLOBAL FINTECH PREMIUM STYLES (Formulaires, Animations, Ergonomie)
+ * ========================================================================= */
+
+/* --- 1. Animations Fluides --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* --- 2. Ergonomie des Formulaires (Inputs) --- */
+ion-item.custom-input {
+  --background: var(--ion-color-step-50, #f8fafc);
+  --border-radius: 14px;
+  --padding-start: 1.2rem;
+  --inner-padding-end: 1.2rem;
+  --highlight-color-focused: var(--ion-color-primary);
+  margin-bottom: 1.25rem;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--ion-color-step-100, #f1f5f9);
+  transition: all 0.3s ease;
+
+  &.item-has-focus {
+    box-shadow: 0 4px 15px rgba(var(--ion-color-primary-rgb), 0.15);
+    border-color: var(--ion-color-primary);
+    transform: translateY(-2px);
+  }
+
+  ion-label {
+    color: var(--ion-color-medium);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+  }
+
+  ion-input, ion-select, ion-textarea {
+    font-weight: 500;
+    color: var(--ion-color-dark);
+  }
+}
+
+/* --- 3. Boutons Premium --- */
+.btn-premium {
+  --border-radius: 16px;
+  --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  height: 56px;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 1.5rem;
+
+  &:active { transform: scale(0.96); }
+}
+
+/* --- 4. Dark Mode Form Adjustments --- */
+html.dark, html.ion-palette-dark {
+  ion-item.custom-input {
+    --background: #1e293b; /* slate-800 */
+    border-color: #334155; /* slate-700 */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+
+    ion-label { color: #94a3b8; /* slate-400 */ }
+    ion-input, ion-select, ion-textarea { color: #f8fafc; /* slate-50 */ }
+
+    &.item-has-focus {
+      border-color: var(--ion-color-primary);
+      box-shadow: 0 4px 15px rgba(var(--ion-color-primary-rgb), 0.3);
+    }
+  }
+}
+
+/* --- 5. Custom Page Backgrounds --- */
+.auth-bg { --background: var(--ion-color-step-50, #f8fafc); }
+html.dark .auth-bg, html.ion-palette-dark .auth-bg { --background: #0f172a; /* slate-900 */ }

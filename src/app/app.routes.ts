@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { BoutiqueGuard } from './core/guards/boutique.guard';
 
+// Trigger rebuild for liquidation component
 export const routes: Routes = [
   {
     path: '',
@@ -22,10 +24,12 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [BoutiqueGuard],
         loadComponent: () => import('./features/main/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'caisse',
+        canActivate: [BoutiqueGuard],
         loadComponent: () => import('./features/main/caisse/caisse.component').then(m => m.CaisseComponent)
       },
       {
@@ -34,7 +38,21 @@ export const routes: Routes = [
       },
       {
         path: 'catalogue',
+        canActivate: [BoutiqueGuard],
         loadComponent: () => import('./features/main/catalogue/catalogue.component').then(m => m.CatalogueComponent)
+      },
+      {
+        path: 'liquidation',
+        canActivate: [BoutiqueGuard],
+        loadComponent: () => import('./features/main/liquidation/liquidation.component').then(m => m.LiquidationComponent)
+      },
+      {
+        path: 'create-boutique',
+        loadComponent: () => import('./features/main/create-boutique/create-boutique.component').then(m => m.CreateBoutiqueComponent)
+      },
+      {
+        path: 'select-boutique',
+        loadComponent: () => import('./features/main/select-boutique/select-boutique.component').then(m => m.SelectBoutiqueComponent)
       },
       {
         path: '',

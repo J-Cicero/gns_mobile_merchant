@@ -78,12 +78,12 @@ export class RegisterComponent implements OnInit {
       }
       this.currentStep = 2;
     } else if (this.currentStep === 2) {
-      // Bank is optional but if selected need details
+      // Si la banque est remplie, vérifier que le numéro de compte et le RIB sont présents
       if (this.registrationData.bankTrackingId && (!this.registrationData.accountNumber || !this.ribFile)) {
         this.errorMessage = 'Veuillez fournir un numéro de compte et le fichier RIB.';
         return;
       }
-      this.currentStep = 3;
+      this.onSubmit(); // On soumet directement à la fin de l'étape 2 !
     }
   }
 
@@ -95,40 +95,34 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.currentStep === 3) {
-      if (!this.registrationData.businessName) {
-        this.errorMessage = 'Veuillez renseigner le nom de votre boutique.';
-        return;
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    // Plus besoin de businessName ici, on passe la data sans informations de boutique
+    this.merchantService.registerMerchant(this.registrationData, this.ribFile || undefined).subscribe({
+      next: (res) => {
+        // Tentative de connexion automatique
+        this.authService.login({
+          email: this.registrationData.email,
+          password: this.registrationData.password!
+        }).subscribe({
+          next: (loginRes) => {
+            this.isSubmitting = false;
+            // Redirection vers select-boutique qui demandera la création
+            this.router.navigate(['/main/select-boutique']);
+          },
+          error: (loginErr) => {
+            this.isSubmitting = false;
+            this.errorMessage = 'Compte créé mais connexion automatique échouée. Veuillez vous connecter manuellement.';
+            setTimeout(() => this.router.navigate(['/auth/login']), 2000);
+          }
+        });
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.errorMessage = err.error?.message || 'Erreur lors de la création du compte marchand. Veuillez réessayer.';
+        console.error('Registration error', err);
       }
-
-      this.isSubmitting = true;
-      this.errorMessage = '';
-
-      this.merchantService.registerMerchant(this.registrationData, this.ribFile || undefined).subscribe({
-        next: (res) => {
-          // Attempt to log in the new merchant
-          this.authService.login({
-            email: this.registrationData.email,
-            password: this.registrationData.password!
-          }).subscribe({
-            next: (loginRes) => {
-              this.isSubmitting = false;
-              // Navigate to dashboard or appropriate post-registration page
-              this.router.navigate(['/main/dashboard']);
-            },
-            error: (loginErr) => {
-              this.isSubmitting = false;
-              this.errorMessage = 'Compte créé mais connexion automatique échouée. Veuillez vous connecter manuellement.';
-              setTimeout(() => this.router.navigate(['/auth/login']), 2000);
-            }
-          });
-        },
-        error: (err) => {
-          this.isSubmitting = false;
-          this.errorMessage = err.error?.message || 'Erreur lors de la création du compte marchand. Veuillez réessayer.';
-          console.error('Registration error', err);
-        }
-      });
-    }
+    });
   }
 }

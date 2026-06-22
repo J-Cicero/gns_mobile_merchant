@@ -1,0 +1,47 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>Choix de la boutique</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bg-slate-50 dark:bg-slate-900">
+  <div class="px-6 py-8">
+    <div class="text-center mb-8 mt-4">
+      <div class="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-indigo-50 dark:border-indigo-900/50">
+        <ion-icon name="storefront-outline" class="text-4xl text-indigo-600 dark:text-indigo-400"></ion-icon>
+      </div>
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white">Sélectionnez une boutique</h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">Avec quelle boutique souhaitez-vous vous connecter ?</p>
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center py-12">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+
+    <div *ngIf="errorMessage" class="bg-red-50 p-4 rounded-xl mb-4">
+      <p class="text-red-600 text-sm font-medium text-center">{{ errorMessage }}</p>
+    </div>
+
+    <div *ngIf="!isLoading && boutiques.length > 1" class="space-y-4">
+      <div *ngFor="let boutique of boutiques" 
+           (click)="selectBoutique(boutique)"
+           class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between active:scale-95 transition-transform">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mr-4">
+            <span class="text-purple-600 dark:text-purple-400 font-bold text-lg">{{ boutique.name.charAt(0) | uppercase }}</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-lg">{{ boutique.name }}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{{ boutique.description || 'Aucune description' }}</p>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="text-slate-400"></ion-icon>
+      </div>
+    </div>
+  </div>
+</ion-content>
