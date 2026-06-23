@@ -103,7 +103,20 @@ export class MerchantService {
   }
 
   getProducts(boutiqueId: string): Observable<Produit[]> {
-    return this.http.get<Produit[]>(`${this.apiUrl}/products/boutique/${boutiqueId}`);
+    return this.http.get<any>(`${this.apiUrl}/products/boutique/${boutiqueId}`).pipe(
+      map(res => {
+        if (res && res.content) {
+          return res.content;
+        }
+        return res || [];
+      }),
+      catchError(err => {
+        if (err.status === 404) {
+          return of([]);
+        }
+        throw err;
+      })
+    );
   }
 
 

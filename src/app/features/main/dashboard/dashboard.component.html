@@ -40,13 +40,13 @@
 
     <div *ngIf="!isLoading && selectedBoutique">
       <!-- Boutique Wallet Info / Quota -->
-      <div class="bg-gradient-to-br from-purple-600 to-pink-700 rounded-3xl p-6 text-white shadow-xl shadow-purple-600/30 mb-8 relative overflow-hidden animate-fade-in-up">
+      <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 text-white shadow-xl shadow-blue-600/30 mb-8 relative overflow-hidden animate-fade-in-up">
         <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
         <div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
         
         <div class="relative z-10">
           <div class="flex justify-between items-center mb-6">
-            <span class="text-purple-100 font-medium text-sm tracking-widest uppercase">Solde Actuel</span>
+            <span class="text-blue-100 font-medium text-sm tracking-widest uppercase">Quota Restant</span>
             <span class="px-2.5 py-1 bg-white/20 rounded-full text-xs font-bold border border-white/20">
               {{ selectedBoutique.kycStatus }}
             </span>
@@ -54,16 +54,13 @@
           
           <div class="mb-6">
             <h2 class="text-4xl font-black tracking-tight flex items-baseline">
-              {{ quotaRestant | number:'1.0-0':'fr-FR' }} <span class="text-lg font-bold ml-1 text-purple-200">FCFA</span>
+              {{ (quotaInitial - quotaRestant) | number:'1.0-0':'fr-FR' }} <span class="text-lg font-bold ml-1 text-blue-200">FCFA</span>
             </h2>
-            <p class="text-xs text-purple-200 mt-1">Quota Limite: {{ quotaInitial | number:'1.0-0':'fr-FR' }} FCFA</p>
+            <p class="text-xs text-blue-200 mt-1">Quota Limite: {{ quotaInitial | number:'1.0-0':'fr-FR' }} FCFA</p>
           </div>
 
-          <div class="flex justify-between items-end">
-            <div class="text-xs text-purple-200 font-mono tracking-wider opacity-80">
-              ID Boutique: {{ selectedBoutique.trackingId }}
-            </div>
-            <button routerLink="/main/caisse" class="w-12 h-12 bg-white text-purple-600 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-transform active:scale-95">
+          <div class="flex justify-end items-end">
+            <button routerLink="/main/caisse" class="w-12 h-12 bg-white text-blue-600 rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-transform active:scale-95">
               <ion-icon name="cash-outline" class="text-2xl"></ion-icon>
             </button>
           </div>
@@ -79,9 +76,9 @@
         </div>
         
         <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col items-start justify-center text-left">
-          <ion-icon name="person-outline" class="text-2xl text-blue-500 mb-2"></ion-icon>
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Clients Uniques</span>
-          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mt-1">{{ clientsUniques }}</h3>
+          <ion-icon name="wallet-outline" class="text-2xl text-blue-500 mb-2"></ion-icon>
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Encaissements</span>
+          <h3 class="text-xl font-extrabold text-slate-900 dark:text-white mt-1">{{ quotaRestant | number:'1.0-0':'fr-FR' }} FCFA</h3>
         </div>
       </div>
 
