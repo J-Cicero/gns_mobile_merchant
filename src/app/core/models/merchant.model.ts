@@ -6,8 +6,7 @@ export interface MerchantRequest {
   isActive?: boolean;
   phoneNumber: string;
   birthDate?: string;
-  businessName: string;
-  registrationNumber?: string;
+  birthPlace?: string;
   bankTrackingId?: string;
   accountNumber?: string;
 }
@@ -20,5 +19,5 @@ export interface MerchantResponse {
   isActive: boolean;
   phoneNumber: string;
   birthDate?: string;
-  businessName: string;
+  birthPlace?: string;
 }

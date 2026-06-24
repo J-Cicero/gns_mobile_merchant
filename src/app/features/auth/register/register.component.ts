@@ -24,8 +24,8 @@ export class RegisterComponent implements OnInit {
     email: '',
     phoneNumber: '',
     password: '',
-    businessName: '',
-    registrationNumber: '',
+    birthDate: '',
+    birthPlace: '',
     bankTrackingId: '',
     accountNumber: ''
   };
@@ -45,12 +45,31 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit() {
     this.loadBanques();
+
+    // Restauration de l'état en cas de rafraîchissement (ex: lors du choix de fichier sur mobile)
+    const savedState = sessionStorage.getItem('merchantRegistrationState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        this.currentStep = state.currentStep || 1;
+        this.registrationData = state.registrationData || this.registrationData;
+      } catch (e) {
+        console.error('Erreur lecture state', e);
+      }
+    }
+  }
+
+  saveState() {
+    sessionStorage.setItem('merchantRegistrationState', JSON.stringify({
+      currentStep: this.currentStep,
+      registrationData: this.registrationData
+    }));
   }
 
   loadBanques() {
     this.merchantService.getBanks().subscribe({
-      next: (res: Bank[]) => { // Assuming getBanks returns an array of Bank
-        this.banques = res;
+      next: (res: any) => {
+        this.banques = Array.isArray(res) ? res : (res.content || []);
       },
       error: (err: any) => {
         console.error('Erreur chargement banques', err);
@@ -72,11 +91,12 @@ export class RegisterComponent implements OnInit {
   nextStep() {
     this.errorMessage = '';
     if (this.currentStep === 1) {
-      if (!this.registrationData.firstName || !this.registrationData.lastName || !this.registrationData.email || !this.registrationData.phoneNumber || !this.registrationData.password) {
-        this.errorMessage = 'Veuillez remplir vos informations personnelles.';
+      if (!this.registrationData.firstName || !this.registrationData.lastName || !this.registrationData.email || !this.registrationData.phoneNumber || !this.registrationData.password || !this.registrationData.birthDate || !this.registrationData.birthPlace) {
+        this.errorMessage = 'Veuillez remplir toutes les informations personnelles.';
         return;
       }
       this.currentStep = 2;
+      this.saveState();
     } else if (this.currentStep === 2) {
       // Si la banque est remplie, vérifier que le numéro de compte et le RIB sont présents
       if (this.registrationData.bankTrackingId && (!this.registrationData.accountNumber || !this.ribFile)) {
@@ -91,6 +111,7 @@ export class RegisterComponent implements OnInit {
     this.errorMessage = '';
     if (this.currentStep > 1) {
       this.currentStep--;
+      this.saveState();
     }
   }
 
@@ -98,9 +119,15 @@ export class RegisterComponent implements OnInit {
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    // Plus besoin de businessName ici, on passe la data sans informations de boutique
-    this.merchantService.registerMerchant(this.registrationData, this.ribFile || undefined).subscribe({
+    // Adjust payload structure since birthDate might need formatting
+    const payload: any = { ...this.registrationData };
+    if (payload.birthDate) {
+      payload.birthDate = `${payload.birthDate}T00:00:00`;
+    }
+
+    this.merchantService.registerMerchant(payload as MerchantRequest, this.ribFile || undefined).subscribe({
       next: (res) => {
+        sessionStorage.removeItem('merchantRegistrationState'); // Nettoyage
         // Tentative de connexion automatique
         this.authService.login({
           email: this.registrationData.email,
