@@ -28,6 +28,8 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
   amount: number | null = null;
   qrData: string = '';
   transactionTrackingId: string | null = null;
+  scannedStudentId: string | null = null;
+  studentPin: string = '';
 
   isLoading = false;
   errorMessage = '';
@@ -101,13 +103,20 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
       let studentTrackingId = resultString;
       if (resultString.startsWith('{')) {
         const payload = JSON.parse(resultString);
-        studentTrackingId = payload.senderTrackingId || payload.studentTrackingId;
+        
+        if (payload.type !== 'PAYMENT') {
+          this.presentAlert('Erreur', 'QR Code non valide pour un paiement.');
+          return;
+        }
+        studentTrackingId = payload.studentId || payload.senderTrackingId || payload.studentTrackingId;
       }
 
-      this.processPayment(studentTrackingId);
+      this.scannedStudentId = studentTrackingId;
+      // Ne pas appeler processPayment() ici, on attend le PIN
+
     } catch (e) {
       // If not JSON, assume it's directly the ID
-      this.processPayment(resultString);
+      this.scannedStudentId = resultString;
     }
   }
 
@@ -119,7 +128,11 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
     this.hasPermission = has;
   }
 
-  async processPayment(studentTrackingId: string) {
+  async processPayment() {
+    if (!this.studentPin || this.studentPin.length < 4) {
+      this.presentAlert('Erreur', 'Veuillez saisir le code PIN étudiant.');
+      return;
+    }
     this.isLoading = true;
     const merchantId = this.authService.getCurrentMerchantId();
     if (!merchantId) {
@@ -129,10 +142,10 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
     }
 
     const transactionRequest: TransactionRequest = {
-      senderTrackingId: studentTrackingId, // Student pays
+      senderTrackingId: this.scannedStudentId!, // Student pays
       receiverTrackingId: this.selectedBoutiqueId!, // Boutique receives
       amount: this.amount!,
-      password: '' // Usually requires a password/PIN from the student, but since merchant scans, maybe no PIN, or the backend must handle this.
+      transactionPin: this.studentPin // Send PIN safely
     };
 
     this.transactionService.initiatePayment(transactionRequest).subscribe({
@@ -152,6 +165,8 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
   resetPayment() {
     this.amount = null;
     this.isScanning = false;
+    this.scannedStudentId = null;
+    this.studentPin = '';
     this.errorMessage = '';
   }
 

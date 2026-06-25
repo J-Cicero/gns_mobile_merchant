@@ -37,13 +37,13 @@ export class BoutiqueGuard implements CanActivate {
       map(has => {
         if (!has) {
           this.showToast('Votre boutique doit être configurée pour accéder à cette section.');
-          this.router.navigate(['/main/create-boutique']);
+          this.router.navigate(['/create-boutique']);
           return false;
         }
         return true;
       }),
       catchError(() => {
-        this.router.navigate(['/main/create-boutique']);
+        this.router.navigate(['/create-boutique']);
         return of(false);
       })
     );

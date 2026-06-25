@@ -48,7 +48,14 @@
       <div *ngIf="isScanning" class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 animate-fade-in-up mt-8 w-full max-w-sm">
         <h3 class="text-lg font-extrabold text-slate-900 dark:text-white text-center mb-4">Scanner le QR Code Étudiant</h3>
         
-        <div class="relative rounded-2xl overflow-hidden bg-black aspect-square flex items-center justify-center">
+        <div *ngIf="scannedStudentId" class="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl border border-indigo-100 dark:border-indigo-800 mb-6">
+           <p class="text-center text-slate-700 dark:text-slate-300 font-bold mb-3">Étudiant identifié.</p>
+           <input type="password" inputmode="numeric" maxlength="6" [(ngModel)]="studentPin" class="w-full bg-white dark:bg-slate-800 p-3 rounded-lg text-center font-bold text-xl tracking-widest border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="PIN étudiant" />
+           <button (click)="processPayment()" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl transition-colors">Valider le paiement</button>
+           <button (click)="resetPayment()" class="w-full mt-2 text-slate-500 font-bold p-2 text-sm">Annuler</button>
+        </div>
+
+        <div class="relative rounded-2xl overflow-hidden bg-black aspect-square flex items-center justify-center" *ngIf="!scannedStudentId">
           <zxing-scanner 
             [enable]="isScanning" 
             (scanSuccess)="onCodeResult($event)" 

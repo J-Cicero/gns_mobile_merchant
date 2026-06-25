@@ -9,7 +9,7 @@ export interface TransactionRequest {
   senderTrackingId: string;
   receiverTrackingId: string;
   amount: number; // BigDecimal from backend -> number
-  password?: string; // String from backend
+  transactionPin?: string; // String from backend
   isCommissionPaid?: boolean; // Boolean from backend
   isRetry?: boolean; // Boolean from backend
 }

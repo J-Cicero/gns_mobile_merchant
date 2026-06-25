@@ -3,7 +3,7 @@ export interface ProductRequest {
   name: string;
   description: string;
   price: number; // BigDecimal from backend -> number
-  stock: number;
+  stock?: number | null;
   isAvailable: boolean;
   addedAt?: string; // LocalDateTime from backend -> string
 }
@@ -14,7 +14,7 @@ export interface ProductResponse {
   name: string;
   description: string;
   price: number; // BigDecimal from backend -> number
-  stock: number;
+  stock?: number | null;
   isAvailable: boolean;
   addedAt: string; // LocalDateTime from backend -> string
 }

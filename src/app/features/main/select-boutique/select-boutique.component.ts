@@ -51,7 +51,7 @@ export class SelectBoutiqueComponent implements OnInit {
           }
         } else {
           // 0 boutique -> go to create
-          this.router.navigate(['/main/create-boutique']);
+          this.router.navigate(['/create-boutique']);
         }
       },
       error: (err) => {

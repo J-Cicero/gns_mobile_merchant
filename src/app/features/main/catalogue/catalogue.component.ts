@@ -20,7 +20,7 @@ export class CatalogueComponent implements OnInit, ViewWillEnter {
   errorMessage = '';
 
   isAddProductModalOpen = false;
-  newProduct: Partial<ProductRequest> = { name: '', description: '', price: 0, stock: 100 };
+  newProduct: Partial<ProductRequest> = { name: '', description: '', price: 0 };
   isSubmittingProduct = false;
 
   constructor(private merchantService: MerchantService) { }
@@ -54,7 +54,7 @@ export class CatalogueComponent implements OnInit, ViewWillEnter {
   }
 
   openAddProductModal() {
-    this.newProduct = { name: '', description: '', price: 0, stock: 100 };
+    this.newProduct = { name: '', description: '', price: 0 };
     this.isAddProductModalOpen = true;
   }
 
@@ -71,7 +71,7 @@ export class CatalogueComponent implements OnInit, ViewWillEnter {
       name: this.newProduct.name,
       description: this.newProduct.description || '',
       price: this.newProduct.price,
-      stock: this.newProduct.stock || 0,
+
       isAvailable: true,
       boutiqueTrackingId: selectedBoutiqueId
     };

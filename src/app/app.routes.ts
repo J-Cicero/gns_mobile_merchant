@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'create-boutique',
+    canActivate: [AuthGuard],
+    loadComponent: () => import('./features/main/create-boutique/create-boutique.component').then(m => m.CreateBoutiqueComponent)
+  },
+  {
     path: 'main',
     canActivate: [AuthGuard],
     loadComponent: () => import('./features/main/tabs/tabs.component').then(m => m.TabsComponent),
@@ -46,10 +51,7 @@ export const routes: Routes = [
         canActivate: [BoutiqueGuard],
         loadComponent: () => import('./features/main/liquidation/liquidation.component').then(m => m.LiquidationComponent)
       },
-      {
-        path: 'create-boutique',
-        loadComponent: () => import('./features/main/create-boutique/create-boutique.component').then(m => m.CreateBoutiqueComponent)
-      },
+
       {
         path: 'select-boutique',
         loadComponent: () => import('./features/main/select-boutique/select-boutique.component').then(m => m.SelectBoutiqueComponent)

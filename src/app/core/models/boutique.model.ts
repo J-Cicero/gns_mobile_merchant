@@ -17,7 +17,7 @@ export interface Produit {
   description: string;
   price: number;
   boutiqueTrackingId: string;
-  stock: number;
+  stock?: number | null;
   isAvailable: boolean;
   addedAt?: string;
 }

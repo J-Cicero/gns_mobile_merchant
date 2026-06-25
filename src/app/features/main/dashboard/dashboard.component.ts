@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
   quotaInitial = 0;
   quotaRestant = 0;
   ventesJour = 0;
+  nombreVentesJour = 0;
   clientsUniques = 0;
   recentTransactions: TransactionResponse[] = []; // Declare recentTransactions
 
@@ -85,7 +86,7 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
                 this.isLoading = false;
               }
             } else {
-              this.router.navigate(['/main/create-boutique']);
+              this.router.navigate(['/create-boutique']);
             }
           },
           error: (err) => {
@@ -127,6 +128,9 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
               return txDate.toDateString() === today.toDateString() && tx.status === 'VALIDE';
             });
             this.ventesJour = todaySales.reduce((sum, tx) => sum + tx.amount, 0);
+            this.nombreVentesJour = todaySales.length;
+
+            this.recentTransactions = res.content || [];
 
             const uniqueClients = new Set(todaySales.map(tx => tx.senderTrackingId));
             this.clientsUniques = uniqueClients.size;
