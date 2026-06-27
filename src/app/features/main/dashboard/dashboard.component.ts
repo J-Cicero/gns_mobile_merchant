@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ViewWillEnter } from '@ionic/angular';
@@ -12,6 +12,8 @@ import { MerchantResponse } from '../../../core/models/merchant.model';
 import { Boutique } from '../../../core/models/boutique.model';
 import { Page } from '../../../core/models/page.model';
 import { TransactionResponse } from '../../../core/models/transaction.model';
+import { Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +22,7 @@ import { TransactionResponse } from '../../../core/models/transaction.model';
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, RouterModule]
 })
-export class DashboardComponent implements OnInit, ViewWillEnter {
+export class DashboardComponent implements OnInit, OnDestroy, ViewWillEnter {
 
   merchantProfile: MerchantResponse | null = null;
   selectedBoutique: Boutique | null = null;
@@ -35,6 +37,7 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
 
   isLoading = true;
   errorMessage = '';
+  private boutiqueSub?: Subscription;
 
   constructor(
     private merchantService: MerchantService,
@@ -46,12 +49,20 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
   }
 
   ngOnInit() {
-    // Keep this empty for Ionic lifecycle management
+    this.boutiqueSub = this.merchantService.selectedBoutiqueId$
+      .pipe(distinctUntilChanged())
+      .subscribe(id => {
+        if (id && this.selectedBoutique && this.selectedBoutique.trackingId !== id) {
+          this.loadBoutiqueStats(id);
+        }
+      });
   }
 
   ionViewWillEnter() {
     this.loadDashboardData();
   }
+
+  ngOnDestroy() { this.boutiqueSub?.unsubscribe(); }
 
   loadDashboardData() {
     this.isLoading = true;
@@ -109,42 +120,44 @@ export class DashboardComponent implements OnInit, ViewWillEnter {
     this.merchantService.getBoutiqueById(boutiqueTrackingId).subscribe({
       next: (boutique) => {
         this.selectedBoutique = boutique;
-        if (boutique.walletTrackingId) {
-          // Assuming MerchantService can get wallet directly, or needs a WalletService
-          // For now, let's assume getBoutiqueById returns it directly or we need a specific wallet service.
-          // Re-checking backend, BoutiqueResponse contains balance and limitAmount
-          this.quotaInitial = boutique.limitAmount || 0;
-          this.quotaRestant = boutique.balance || 0;
-        } else {
-          this.quotaInitial = 0;
-          this.quotaRestant = 0;
-        }
 
-        this.transactionService.getSalesHistory(boutiqueTrackingId, 0, 10).subscribe({ // Fetch recent sales
-          next: (res: Page<TransactionResponse>) => {
-            const today = new Date();
-            const todaySales = (res.content || []).filter(tx => {
-              const txDate = new Date(tx.createdAt);
-              return txDate.toDateString() === today.toDateString() && tx.status === 'VALIDE';
-            });
-            this.ventesJour = todaySales.reduce((sum, tx) => sum + tx.amount, 0);
-            this.nombreVentesJour = todaySales.length;
+        // ✅ Afficher le solde immédiatement dès réception des données boutique
+        this.quotaInitial = Number(boutique.limitAmount) || 0;
+        this.quotaRestant = Number(boutique.balance) || 0;
 
-            this.recentTransactions = res.content || [];
+        console.log('[Dashboard] Boutique chargée:', boutique.name, '| Balance:', this.quotaRestant, '| Limit:', this.quotaInitial);
 
-            const uniqueClients = new Set(todaySales.map(tx => tx.senderTrackingId));
-            this.clientsUniques = uniqueClients.size;
-            this.isLoading = false;
-          },
-          error: (err) => {
-            this.errorMessage = 'Erreur lors du chargement des ventes: ' + (err.error?.message || err.message);
-            this.isLoading = false;
-          }
-        });
+        // ✅ Arrêter le loader maintenant - le solde est disponible
+        this.isLoading = false;
+
+        // Charger les transactions séparément (ne bloque pas l'affichage)
+        this.loadSalesStats(boutiqueTrackingId);
       },
       error: (err) => {
         this.errorMessage = 'Erreur lors du chargement des stats de boutique: ' + (err.error?.message || err.message);
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadSalesStats(boutiqueTrackingId: string) {
+    this.transactionService.getSalesHistory(boutiqueTrackingId, 0, 10).subscribe({
+      next: (res: Page<TransactionResponse>) => {
+        const today = new Date();
+        const todaySales = (res.content || []).filter(tx => {
+          const txDate = new Date(tx.createdAt);
+          return txDate.toDateString() === today.toDateString() && tx.status === 'VALIDE';
+        });
+        this.ventesJour = todaySales.reduce((sum, tx) => sum + tx.amount, 0);
+        this.nombreVentesJour = todaySales.length;
+        this.recentTransactions = res.content || [];
+        const uniqueClients = new Set(todaySales.map(tx => tx.senderTrackingId));
+        this.clientsUniques = uniqueClients.size;
+      },
+      error: (err) => {
+        // Ne pas bloquer l'UI si les transactions échouent
+        console.warn('[Dashboard] Erreur chargement transactions:', err.error?.message || err.message);
+        this.recentTransactions = [];
       }
     });
   }

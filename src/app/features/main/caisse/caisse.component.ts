@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ViewWillEnter } from '@ionic/angular';
@@ -11,7 +11,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Boutique } from '../../../core/models/boutique.model';
 import { TransactionRequest } from '../../../core/models/transaction.model';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { NgxQrcodeStylingComponent } from 'ngx-qrcode-styling'; // Optional if still needed
+import { Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -21,7 +22,7 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule, IonicModule, ZXingScannerModule]
 })
-export class CaisseComponent implements OnInit, ViewWillEnter {
+export class CaisseComponent implements OnInit, OnDestroy, ViewWillEnter {
 
   boutiques: Boutique[] = [];
   selectedBoutiqueId: string | null = null;
@@ -33,10 +34,10 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
 
   isLoading = false;
   errorMessage = '';
-
   hasDevices: boolean = false;
   hasPermission: boolean = false;
   isScanning: boolean = false;
+  private boutiqueSub?: Subscription;
 
   constructor(
     private router: Router,
@@ -49,11 +50,26 @@ export class CaisseComponent implements OnInit, ViewWillEnter {
   }
 
   ngOnInit() {
+    this.boutiqueSub = this.merchantService.selectedBoutiqueId$
+      .pipe(distinctUntilChanged())
+      .subscribe(id => {
+        if (id) {
+          this.selectedBoutiqueId = id;
+          this.resetPayment();
+        }
+      });
   }
 
   ionViewWillEnter() {
-    this.loadBoutiques();
+    this.selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
+    if (!this.selectedBoutiqueId) {
+      this.loadBoutiques();
+    }
     this.resetPayment();
+  }
+
+  ngOnDestroy() {
+    this.boutiqueSub?.unsubscribe();
   }
 
   loadBoutiques() {

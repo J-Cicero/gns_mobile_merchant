@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ViewWillEnter } from '@ionic/angular';
 import { MerchantService } from '../../../core/services/merchant.service';
 import { Produit } from '../../../core/models/boutique.model';
 import { ProductRequest } from '../../../core/models/product.model';
+import { Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-catalogue',
@@ -13,7 +15,7 @@ import { ProductRequest } from '../../../core/models/product.model';
   standalone: true,
   imports: [CommonModule, IonicModule, FormsModule]
 })
-export class CatalogueComponent implements OnInit, ViewWillEnter {
+export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
 
   produits: Produit[] = [];
   isLoading = false;
@@ -24,8 +26,15 @@ export class CatalogueComponent implements OnInit, ViewWillEnter {
   isSubmittingProduct = false;
 
   constructor(private merchantService: MerchantService) { }
+  private boutiqueSub?: Subscription;
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.boutiqueSub = this.merchantService.selectedBoutiqueId$
+      .pipe(distinctUntilChanged())
+      .subscribe(id => { if (id) this.loadProducts(); });
+  }
+
+  ngOnDestroy() { this.boutiqueSub?.unsubscribe(); }
 
   ionViewWillEnter() {
     this.loadProducts();
@@ -64,14 +73,13 @@ export class CatalogueComponent implements OnInit, ViewWillEnter {
 
   submitNewProduct() {
     const selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
-    if (!selectedBoutiqueId || !this.newProduct.name || !this.newProduct.price) return;
+    if (!selectedBoutiqueId || !this.newProduct.name) return;
 
     this.isSubmittingProduct = true;
     const req: ProductRequest = {
-      name: this.newProduct.name,
+      name: this.newProduct.name!,
       description: this.newProduct.description || '',
-      price: this.newProduct.price,
-
+      price: this.newProduct.price ?? 0,
       isAvailable: true,
       boutiqueTrackingId: selectedBoutiqueId
     };

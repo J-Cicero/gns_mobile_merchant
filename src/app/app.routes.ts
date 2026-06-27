@@ -46,15 +46,16 @@ export const routes: Routes = [
         canActivate: [BoutiqueGuard],
         loadComponent: () => import('./features/main/catalogue/catalogue.component').then(m => m.CatalogueComponent)
       },
-      {
-        path: 'liquidation',
-        canActivate: [BoutiqueGuard],
-        loadComponent: () => import('./features/main/liquidation/liquidation.component').then(m => m.LiquidationComponent)
-      },
+
 
       {
         path: 'select-boutique',
         loadComponent: () => import('./features/main/select-boutique/select-boutique.component').then(m => m.SelectBoutiqueComponent)
+      },
+      {
+        path: 'sales-history',
+        canActivate: [BoutiqueGuard],
+        loadComponent: () => import('./features/main/sales-history/sales-history.component').then(m => m.SalesHistoryComponent)
       },
       {
         path: '',

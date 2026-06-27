@@ -9,32 +9,47 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="empty-state">
-    <ion-icon name="storefront-outline" color="primary"></ion-icon>
-    <h2>Bienvenue !</h2>
-    <p>Il semble que vous n'ayez pas encore de boutique. Veuillez en créer une pour accéder à votre tableau de bord.</p>
-  </div>
+<ion-content class="bg-slate-50 dark:bg-slate-900">
+  <div class="min-h-screen flex flex-col justify-center items-center px-6 py-12">
+    <div class="w-full max-w-sm mb-10 text-center animate-fade-in-up">
+      <ion-icon name="storefront-outline" class="text-5xl text-blue-500 mb-4"></ion-icon>
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white">Bienvenue !</h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Veuillez créer une boutique pour accéder à votre tableau de bord.</p>
+    </div>
 
-  <div class="form-container">
-    <ion-item class="custom-input">
-      <ion-label position="floating">Nom de la boutique</ion-label>
-      <ion-input type="text" [(ngModel)]="newBoutique.name"></ion-input>
-    </ion-item>
+    <div class="w-full max-w-sm bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700 animate-fade-in-up">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nom de la boutique</label>
+          <input type="text" [(ngModel)]="newBoutique.name" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
+        </div>
 
-    <ion-item class="custom-input">
-      <ion-label position="floating">Description</ion-label>
-      <ion-textarea [(ngModel)]="newBoutique.description" rows="3"></ion-textarea>
-    </ion-item>
+        <div>
+          <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Description</label>
+          <textarea [(ngModel)]="newBoutique.description" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"></textarea>
+        </div>
 
-    <ion-text color="danger" *ngIf="errorMessage">
-      <p class="error-msg">{{ errorMessage }}</p>
-    </ion-text>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Latitude (Opt.)</label>
+            <input type="number" [(ngModel)]="newBoutique.latitude" placeholder="Ex: 6.1366" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Longitude (Opt.)</label>
+            <input type="number" [(ngModel)]="newBoutique.longitude" placeholder="Ex: 1.2222" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
+          </div>
+        </div>
 
-    <ion-button expand="block" class="submit-btn" (click)="submitBoutique()" [disabled]="isLoading">
-      <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
-      <span *ngIf="!isLoading">Créer ma boutique</span>
-      <ion-icon slot="end" name="add-circle-outline" *ngIf="!isLoading"></ion-icon>
-    </ion-button>
+        <div *ngIf="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+          <span class="text-sm font-bold text-red-700 dark:text-red-400">{{ errorMessage }}</span>
+        </div>
+
+        <button (click)="submitBoutique()" [disabled]="isLoading" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center disabled:opacity-70">
+          <ion-spinner *ngIf="isLoading" name="crescent" class="mr-2 w-5 h-5"></ion-spinner>
+          <span *ngIf="!isLoading">Créer ma boutique</span>
+          <ion-icon *ngIf="!isLoading" name="add-circle-outline" class="ml-2 text-xl"></ion-icon>
+        </button>
+      </div>
+    </div>
   </div>
 </ion-content>

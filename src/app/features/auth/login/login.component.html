@@ -1,10 +1,10 @@
-<ion-content class="bg-slate-50 dark:bg-slate-900">
+<ion-content class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
   <div class="min-h-screen flex flex-col justify-center items-center px-6 py-12">
 
     <!-- Branding -->
     <div class="w-full max-w-sm mb-10 text-center animate-fade-in-up">
       <div class="mx-auto mb-6 flex justify-center">
-        <img src="assets/studcash-logo.png" alt="studCASH Logo" style="height: 80px; width: auto; object-fit: contain;">
+        <img src="assets/studcash-logo.png" alt="studCASH Logo" class="mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:rounded-xl dark:p-2" style="height: 80px; width: auto; object-fit: contain;">
       </div>
       <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Gérez votre commerce avec simplicité</p>
     </div>
@@ -23,7 +23,7 @@
               <ion-icon name="mail-outline" class="text-xl"></ion-icon>
             </div>
             <input type="email" [(ngModel)]="credentials.email" placeholder="marchand@exemple.com"
-              class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-medium">
+              class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium">
           </div>
         </div>
 
@@ -35,13 +35,13 @@
               <ion-icon name="lock-closed-outline" class="text-xl"></ion-icon>
             </div>
             <input type="password" [(ngModel)]="credentials.password" placeholder="••••••••"
-              class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all font-medium">
+              class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium">
           </div>
         </div>
 
         <div class="flex justify-end">
           <a
-            class="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors cursor-pointer">Mot
+            class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer">Mot
             de passe oublié ?</a>
         </div>
       </div>
@@ -55,7 +55,7 @@
 
       <!-- Submit -->
       <button (click)="onLogin()" [disabled]="isLoading"
-        class="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center disabled:opacity-70 disabled:active:scale-100">
+        class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center disabled:opacity-70 disabled:active:scale-100">
         <ion-spinner *ngIf="isLoading" name="crescent" class="mr-2 w-5 h-5"></ion-spinner>
         <span *ngIf="!isLoading">Se Connecter</span>
         <ion-icon *ngIf="!isLoading" name="arrow-forward" class="ml-2 text-xl"></ion-icon>
@@ -68,7 +68,7 @@
       <p class="text-slate-500 dark:text-slate-400 font-medium">
         Pas encore de compte ?
         <a (click)="goToRegister()"
-          class="font-extrabold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline">Créer un compte</a>
+          class="font-extrabold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">Créer un compte</a>
       </p>
     </div>
 

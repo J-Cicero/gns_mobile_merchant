@@ -18,7 +18,9 @@ import { storefrontOutline, addCircleOutline, logOutOutline } from 'ionicons/ico
 export class CreateBoutiqueComponent implements OnInit {
   newBoutique = {
     name: '',
-    description: ''
+    description: '',
+    latitude: null as number | null,
+    longitude: null as number | null
   };
   isLoading = false;
   errorMessage = '';
@@ -63,6 +65,8 @@ export class CreateBoutiqueComponent implements OnInit {
     const request: any = {
       name: this.newBoutique.name,
       description: this.newBoutique.description,
+      latitude: this.newBoutique.latitude,
+      longitude: this.newBoutique.longitude,
       kycStatus: 'EN_ATTENTE',
       merchantTrackingId: merchantId
     };

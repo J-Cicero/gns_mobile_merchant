@@ -1,19 +1,19 @@
-<ion-content class="bg-slate-50 dark:bg-slate-900">
+<ion-content class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
   <div class="min-h-screen flex flex-col justify-center items-center px-6 py-12">
 
     <!-- Branding & Steps -->
     <div class="w-full max-w-md mb-8 text-center animate-fade-in-up">
       <div class="mx-auto mb-4 flex justify-center">
-        <img src="assets/studcash-logo.png" alt="studCASH Logo" style="height: 64px; width: auto; object-fit: contain;">
+        <img src="assets/studcash-logo.png" alt="studCASH Logo" class="mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:rounded-xl dark:p-2" style="height: 64px; width: auto; object-fit: contain;">
       </div>
       <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Inscription Marchand</h1>
       <div class="flex items-center justify-center space-x-2 mt-4">
         <div class="h-2 flex-1 rounded-full"
-          [ngClass]="currentStep >= 1 ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'"></div>
+          [ngClass]="currentStep >= 1 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"></div>
         <div class="h-2 flex-1 rounded-full"
-          [ngClass]="currentStep >= 2 ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-700'"></div>
+          [ngClass]="currentStep >= 2 ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"></div>
       </div>
-      <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-2 uppercase tracking-widest">Étape {{
+      <p class="text-sm font-bold text-blue-600 dark:text-blue-400 mt-2 uppercase tracking-widest">Étape {{
         currentStep }} sur 2</p>
     </div>
 
@@ -38,12 +38,12 @@
           <div>
             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nom</label>
             <input type="text" [(ngModel)]="registrationData.lastName" name="lastName" placeholder="Ex: DOSSO" required
-              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
           </div>
           <div>
             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Prénom</label>
             <input type="text" [(ngModel)]="registrationData.firstName" name="firstName" placeholder="Ex: Marc" required
-              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
           </div>
         </div>
 
@@ -51,46 +51,46 @@
           <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Email</label>
           <input type="email" [(ngModel)]="registrationData.email" name="email" placeholder="marchand@exemple.com"
             required
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
         </div>
 
         <div>
           <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Téléphone</label>
           <input type="tel" [(ngModel)]="registrationData.phoneNumber" name="phoneNumber" placeholder="+228 90 00 00 00"
             required
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
         </div>
 
         <div>
           <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Mot de passe</label>
           <input type="password" [(ngModel)]="registrationData.password" name="password" placeholder="••••••••" required
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
         </div>
 
         <div>
           <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Date de naissance</label>
           <input type="date" [(ngModel)]="registrationData.birthDate" name="birthDate" required
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
         </div>
 
         <div>
           <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Lieu de naissance</label>
           <input type="text" [(ngModel)]="registrationData.birthPlace" name="birthPlace" placeholder="Ex: Lomé" required
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
         </div>
       </div>
 
       <!-- STEP 2 -->
       <div *ngIf="currentStep === 2" class="space-y-5 animate-fade-in">
         <div class="mb-6 border-b border-slate-100 dark:border-slate-700 pb-4">
-          <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Compte de Liquidation</h3>
+          <h3 class="text-lg font-extrabold text-slate-900 dark:text-white">Compte Bancaire</h3>
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Où souhaitez-vous recevoir vos paiements ?</p>
         </div>
 
         <div>
           <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Banque</label>
           <select [(ngModel)]="registrationData.bankTrackingId" name="bankTrackingId"
-            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium appearance-none">
+            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium appearance-none">
             <option value="" disabled selected>Sélectionner une banque</option>
             <option *ngFor="let banque of banques" [value]="banque.trackingId">{{ banque.name }}</option>
           </select>
@@ -101,14 +101,14 @@
             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Numéro de Compte</label>
             <input type="text" [(ngModel)]="registrationData.accountNumber" name="accountNumber"
               placeholder="Ex: 0123456789" required
-              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
+              class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium">
           </div>
 
           <div class="animate-fade-in-up mt-4">
             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">RIB (Image/PDF)</label>
             <div
               class="relative border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-6 text-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-              <ion-icon name="cloud-upload-outline" class="text-3xl text-indigo-500 mb-2"></ion-icon>
+              <ion-icon name="cloud-upload-outline" class="text-3xl text-blue-500 mb-2"></ion-icon>
               <p class="text-sm font-bold text-slate-600 dark:text-slate-400">
                 {{ ribFile ? ribFile.name : 'Appuyez pour sélectionner' }}
               </p>
@@ -129,12 +129,12 @@
         </button>
 
         <button type="button" *ngIf="currentStep < 2" (click)="nextStep()"
-          class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
+          class="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95">
           Continuer
         </button>
 
         <button type="button" (click)="nextStep()" *ngIf="currentStep === 2" [disabled]="isSubmitting"
-          class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center disabled:opacity-70 disabled:active:scale-100">
+          class="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center disabled:opacity-70 disabled:active:scale-100">
           <ion-spinner *ngIf="isSubmitting" name="crescent" class="mr-2 w-5 h-5"></ion-spinner>
           <span *ngIf="!isSubmitting">Créer le compte</span>
         </button>
@@ -145,7 +145,7 @@
       <p class="text-slate-500 dark:text-slate-400 font-medium">
         Déjà un compte ?
         <a (click)="goToLogin()"
-          class="font-extrabold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline">Connectez-vous</a>
+          class="font-extrabold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">Connectez-vous</a>
       </p>
     </div>
 

@@ -28,9 +28,15 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   isLoading = false;
   errorMessage = '';
   isAddBoutiqueModalOpen = false;
-  newBoutique: Partial<Boutique> = {
+  isEditBoutiqueModalOpen = false;
+  editingBoutique: Boutique | null = null;
+  editLatitude: number | undefined = undefined;
+  editLongitude: number | undefined = undefined;
+  newBoutique: Partial<Boutique> & { latitude?: number, longitude?: number } = {
     name: '',
-    description: ''
+    description: '',
+    latitude: undefined,
+    longitude: undefined
   };
   isSubmittingBoutique = false;
 
@@ -118,6 +124,47 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
     this.isAddBoutiqueModalOpen = false;
   }
 
+  openEditBoutiqueModal(boutique: Boutique) {
+    this.editingBoutique = boutique;
+    this.editLatitude = boutique.latitude;
+    this.editLongitude = boutique.longitude;
+    this.errorMessage = '';
+    this.isEditBoutiqueModalOpen = true;
+  }
+
+  closeEditBoutiqueModal() {
+    this.isEditBoutiqueModalOpen = false;
+    this.editingBoutique = null;
+  }
+
+  submitEditBoutique() {
+    if (!this.editingBoutique || !this.editingBoutique.trackingId) return;
+
+    this.isSubmittingBoutique = true;
+    this.errorMessage = '';
+
+    const request: Boutique = {
+      ...this.editingBoutique,
+      latitude: this.editLatitude,
+      longitude: this.editLongitude
+    };
+
+    this.merchantService.updateBoutique(this.editingBoutique.trackingId, request).subscribe({
+      next: () => {
+        this.isSubmittingBoutique = false;
+        this.closeEditBoutiqueModal();
+        const merchantId = this.authService.getCurrentMerchantId();
+        if (merchantId) {
+          this.loadBoutiques(merchantId); // Refresh list
+        }
+      },
+      error: (err) => {
+        this.isSubmittingBoutique = false;
+        this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour de la boutique.';
+      }
+    });
+  }
+
   submitNewBoutique() {
     if (!this.newBoutique.name || !this.newBoutique.description) {
       this.errorMessage = 'Veuillez remplir tous les champs.';
@@ -133,6 +180,8 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
     const request: any = {
       name: this.newBoutique.name,
       description: this.newBoutique.description,
+      latitude: this.newBoutique.latitude,
+      longitude: this.newBoutique.longitude,
       kycStatus: 'EN_ATTENTE',
       merchantTrackingId: merchantId
     };

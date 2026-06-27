@@ -1,0 +1,87 @@
+<ion-content class="bg-slate-50 dark:bg-slate-900">
+  <div class="px-6 py-6 min-h-screen">
+
+    <!-- Header -->
+    <div class="sticky top-0 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md z-10 pb-4 mb-6 border-b border-slate-200/50 dark:border-slate-800/50 flex items-center gap-3">
+      <button routerLink="/main/dashboard" class="w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700">
+        <ion-icon name="arrow-back-outline" class="text-lg text-slate-700 dark:text-slate-300"></ion-icon>
+      </button>
+      <div>
+        <h1 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Ventes à Récupérer</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Transactions validées non liquidées</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading && transactions.length === 0" class="flex flex-col items-center justify-center py-20">
+      <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-sm text-slate-500 dark:text-slate-400">Chargement des transactions...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage && !isLoading" class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+      <div class="flex items-center gap-2">
+        <ion-icon name="alert-circle-outline" class="text-xl text-red-500"></ion-icon>
+        <p class="text-sm font-bold text-red-700 dark:text-red-400">{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div *ngIf="!isLoading || transactions.length > 0" class="bg-blue-600 dark:bg-slate-800 rounded-3xl p-6 text-white shadow-xl shadow-blue-600/20 mb-6 animate-fade-in-up">
+      <p class="text-blue-200 text-xs font-semibold uppercase tracking-widest mb-1">Solde à récupérer</p>
+      <h2 class="text-4xl font-black tracking-tight">
+        {{ totalNonLiquidated | number:'1.0-0':'fr-FR' }}
+      </h2>
+      <p class="text-blue-200 font-bold text-base mt-0.5">FCFA</p>
+      <div class="mt-4 pt-4 border-t border-white/20">
+        <p class="text-blue-100 text-sm">{{ nonLiquidatedList.length }} vente(s) non liquidée(s)</p>
+      </div>
+    </div>
+
+    <!-- Transactions List -->
+    <div *ngIf="!isLoading || transactions.length > 0">
+      <!-- Empty -->
+      <div *ngIf="nonLiquidatedList.length === 0 && !isLoading" class="flex flex-col items-center justify-center py-16 text-center">
+        <ion-icon name="time-outline" class="text-5xl text-slate-300 dark:text-slate-600 mb-4"></ion-icon>
+        <h3 class="text-base font-bold text-slate-700 dark:text-slate-300">Tout est à jour !</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Aucune vente en attente de liquidation.</p>
+      </div>
+
+      <!-- List -->
+      <div *ngIf="nonLiquidatedList.length > 0" class="space-y-3 animate-fade-in-up">
+        <div *ngFor="let tx of nonLiquidatedList"
+          class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-500">
+              <ion-icon name="cash-outline" class="text-xl"></ion-icon>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-slate-900 dark:text-white">{{ tx.senderName }}</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                {{ tx.createdAt | date:'dd MMM yyyy, HH:mm' }}
+              </p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-base font-black text-emerald-600 dark:text-emerald-400">
+              +{{ tx.amountCredited | number:'1.0-0':'fr-FR' }} FCFA
+            </p>
+            <span class="inline-block mt-0.5 px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-full uppercase tracking-wider">
+              En attente
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Load More -->
+      <div *ngIf="hasMore" class="mt-6 text-center">
+        <button (click)="loadMore()" [disabled]="isLoadingMore"
+          class="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 shadow-sm transition-all active:scale-95">
+          <span *ngIf="!isLoadingMore">Charger plus</span>
+          <div *ngIf="isLoadingMore" class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
