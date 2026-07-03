@@ -122,8 +122,8 @@ export class DashboardComponent implements OnInit, OnDestroy, ViewWillEnter {
         this.selectedBoutique = boutique;
 
         // ✅ Afficher le solde immédiatement dès réception des données boutique
-        this.quotaInitial = Number(boutique.limitAmount) || 0;
-        this.quotaRestant = Number(boutique.balance) || 0;
+        this.quotaInitial = Number((boutique as any).plafond ?? boutique.limitAmount) || 0;
+        this.quotaRestant = Number((boutique as any).solde ?? boutique.balance) || 0;
 
         console.log('[Dashboard] Boutique chargée:', boutique.name, '| Balance:', this.quotaRestant, '| Limit:', this.quotaInitial);
 

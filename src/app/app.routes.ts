@@ -58,6 +58,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/main/sales-history/sales-history.component').then(m => m.SalesHistoryComponent)
       },
       {
+        path: 'history',
+        canActivate: [BoutiqueGuard],
+        loadComponent: () => import('./features/main/history/history.component').then(m => m.HistoryComponent)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

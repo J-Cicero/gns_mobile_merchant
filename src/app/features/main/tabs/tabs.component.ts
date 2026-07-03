@@ -1,7 +1,7 @@
 import { Component, EnvironmentInjector, inject } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutline } from 'ionicons/icons';
+import { homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutline, timeOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
@@ -22,6 +22,11 @@ import { homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutli
           <div class="qr-fab">
             <ion-icon name="qr-code-outline"></ion-icon>
           </div>
+        </ion-tab-button>
+
+        <ion-tab-button tab="history" class="text-slate-500 dark:text-slate-400 transition-colors">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-label class="text-xs font-medium">Historique</ion-label>
         </ion-tab-button>
 
         <ion-tab-button tab="profile" class="text-slate-500 dark:text-slate-400 transition-colors">
@@ -74,6 +79,6 @@ export class TabsComponent {
   public environmentInjector = inject(EnvironmentInjector);
 
   constructor() {
-    addIcons({ homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutline });
+    addIcons({ homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutline, timeOutline });
   }
 }
