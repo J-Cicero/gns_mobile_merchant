@@ -1,5 +1,5 @@
 import { Component, EnvironmentInjector, inject } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutline, timeOutline } from 'ionicons/icons';
 
@@ -73,7 +73,7 @@ import { homeOutline, cashOutline, storefrontOutline, personOutline, qrCodeOutli
     }
   `],
   standalone: true,
-  imports: [IonicModule],
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
 })
 export class TabsComponent {
   public environmentInjector = inject(EnvironmentInjector);

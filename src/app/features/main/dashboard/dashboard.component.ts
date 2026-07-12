@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ViewWillEnter } from '@ionic/angular';
+import { IonContent, IonRefresher, IonRefresherContent, IonIcon, ViewWillEnter } from '@ionic/angular/standalone';
 import { RouterModule, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { trendingUpOutline, walletOutline, checkmarkCircleOutline, locationOutline, navigateOutline, personOutline, flash } from 'ionicons/icons';
+import { trendingUpOutline, walletOutline, checkmarkCircleOutline, locationOutline, navigateOutline, personOutline, flash, cashOutline } from 'ionicons/icons';
 import { MerchantService } from '../../../core/services/merchant.service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -20,7 +20,7 @@ import { distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, RouterModule]
+  imports: [CommonModule, FormsModule, IonContent, IonRefresher, IonRefresherContent, IonIcon, RouterModule]
 })
 export class DashboardComponent implements OnInit, OnDestroy, ViewWillEnter {
 
