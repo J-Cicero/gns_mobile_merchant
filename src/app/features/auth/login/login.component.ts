@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service'; // Use merchant's AuthService
 import { addIcons } from 'ionicons';
-import { personOutline, lockClosedOutline, flash, arrowForward, alertCircle } from 'ionicons/icons';
+import { personOutline, lockClosedOutline, flash, arrowForward, alertCircle, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
@@ -18,9 +18,14 @@ export class LoginComponent {
   credentials = { email: '', password: '' };
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   constructor(private authService: AuthService, private router: Router, private navCtrl: NavController) {
-    addIcons({ personOutline, lockClosedOutline, flash, arrowForward, alertCircle });
+    addIcons({ personOutline, lockClosedOutline, flash, arrowForward, alertCircle, eyeOutline, eyeOffOutline });
   }
 
   goToRegister() {

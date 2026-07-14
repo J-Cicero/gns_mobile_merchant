@@ -102,6 +102,10 @@ export class MerchantService {
     return this.http.post<ProductResponse>(`${this.apiUrl}/products`, request);
   }
 
+  updateProduct(productId: string, request: ProductRequest): Observable<ProductResponse> {
+    return this.http.put<ProductResponse>(`${this.apiUrl}/products/${productId}`, request);
+  }
+
   getProducts(boutiqueId: string): Observable<Produit[]> {
     return this.http.get<any>(`${this.apiUrl}/products/boutique/${boutiqueId}`).pipe(
       map(res => {

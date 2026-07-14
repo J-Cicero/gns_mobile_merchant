@@ -22,7 +22,9 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
   errorMessage = '';
 
   isAddProductModalOpen = false;
-  newProduct: Partial<ProductRequest> = { name: '', description: '', price: 0 };
+  isEditProductModalOpen = false;
+  newProduct: Partial<ProductRequest> = { name: '', description: '', price: 0, isAvailable: true };
+  selectedProductId: string | null = null;
   isSubmittingProduct = false;
 
   constructor(private merchantService: MerchantService) { }
@@ -63,7 +65,8 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   openAddProductModal() {
-    this.newProduct = { name: '', description: '', price: 0 };
+    this.newProduct = { name: '', description: '', price: 0, isAvailable: true };
+    this.selectedProductId = null;
     this.isAddProductModalOpen = true;
   }
 
@@ -71,7 +74,23 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
     this.isAddProductModalOpen = false;
   }
 
-  submitNewProduct() {
+  openEditProductModal(product: Produit) {
+    this.newProduct = { 
+      name: product.name, 
+      description: product.description, 
+      price: product.price,
+      isAvailable: product.isAvailable !== false
+    };
+    this.selectedProductId = product.trackingId;
+    this.isEditProductModalOpen = true;
+  }
+
+  closeEditProductModal() {
+    this.isEditProductModalOpen = false;
+    this.selectedProductId = null;
+  }
+
+  submitProduct() {
     const selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
     if (!selectedBoutiqueId || !this.newProduct.name) return;
 
@@ -80,19 +99,41 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
       name: this.newProduct.name!,
       description: this.newProduct.description || '',
       price: this.newProduct.price ?? 0,
-      isAvailable: true,
+      isAvailable: this.newProduct.isAvailable !== false,
       boutiqueTrackingId: selectedBoutiqueId
     };
 
-    this.merchantService.addProduct(req).subscribe({
-      next: () => {
-        this.isSubmittingProduct = false;
-        this.closeAddProductModal();
-        this.loadProducts();
-      },
-      error: () => {
-        this.isSubmittingProduct = false;
+    if (this.selectedProductId) {
+      // Edit mode (assuming backend has updateProduct in service, we'll add it if missing)
+      if (this.merchantService['updateProduct']) {
+         // Use existing update method if we added it, but just in case fallback to add logic or implement put
+         (this.merchantService as any).updateProduct(this.selectedProductId, req).subscribe({
+           next: () => {
+             this.isSubmittingProduct = false;
+             this.closeEditProductModal();
+             this.loadProducts();
+           },
+           error: () => {
+             this.isSubmittingProduct = false;
+           }
+         });
+      } else {
+         // Workaround if update is not fully supported in service yet, ideally use PUT
+         this.isSubmittingProduct = false;
+         this.closeEditProductModal();
       }
-    });
+    } else {
+      // Add mode
+      this.merchantService.addProduct(req).subscribe({
+        next: () => {
+          this.isSubmittingProduct = false;
+          this.closeAddProductModal();
+          this.loadProducts();
+        },
+        error: () => {
+          this.isSubmittingProduct = false;
+        }
+      });
+    }
   }
 }

@@ -1,3 +1,4 @@
+<div class="ion-page">
 <ion-content scroll-y="true" class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
   <div class="px-6 py-12">
     <!-- Header Section -->
@@ -134,9 +135,10 @@
     <div class="mt-8 text-center" *ngIf="currentStep === 1">
       <p class="text-sm text-slate-500 dark:text-slate-400">
         Déjà partenaire ? 
-        <a (click)="goToLogin()" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline" style="cursor: pointer;">Connectez-vous</a>
+        <a routerLink="/auth/login" routerDirection="back" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline" style="cursor: pointer;">Connectez-vous</a>
       </p>
     </div>
 
   </div>
 </ion-content>
+</div>

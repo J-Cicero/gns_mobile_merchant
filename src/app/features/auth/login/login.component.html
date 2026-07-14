@@ -1,5 +1,6 @@
+<div class="ion-page">
 <ion-content scroll-y="true" class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
-  <div class="px-6 py-12">
+  <div class="px-6 py-12 flex flex-col items-center justify-center min-h-screen">
 
     <!-- Branding -->
     <div class="w-full max-w-sm mb-10 text-center animate-fade-in-up">
@@ -11,7 +12,7 @@
 
     <!-- Form Section -->
     <div
-      class="w-full max-w-sm bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 animate-fade-in-up"
+      class="w-full max-w-sm mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 animate-fade-in-up"
       style="animation-delay: 100ms;">
 
       <div class="space-y-5">
@@ -34,8 +35,11 @@
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
               <ion-icon name="lock-closed-outline" class="text-xl"></ion-icon>
             </div>
-            <input type="password" [(ngModel)]="credentials.password" placeholder="••••••••"
-              class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium">
+            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="credentials.password" placeholder="••••••••"
+              class="w-full pl-11 pr-11 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium">
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer text-slate-400 z-10" (click)="togglePasswordVisibility()">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" class="text-xl"></ion-icon>
+            </div>
           </div>
         </div>
 
@@ -67,10 +71,11 @@
     <div class="mt-8 text-center animate-fade-in-up" style="animation-delay: 200ms;">
       <p class="text-slate-500 dark:text-slate-400 font-medium">
         Pas encore de compte ?
-        <a (click)="goToRegister()"
+        <a routerLink="/auth/register" routerDirection="forward"
           class="font-extrabold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">Créer un compte</a>
       </p>
     </div>
 
   </div>
 </ion-content>
+</div>
