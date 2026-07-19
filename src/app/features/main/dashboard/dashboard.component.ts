@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonRefresher, IonRefresherContent, IonIcon, ViewWillEnter } from '@ionic/angular/standalone';
+import { IonContent, IonRefresher, IonRefresherContent, IonIcon, ViewWillEnter  } from '@ionic/angular/standalone';
 import { RouterModule, Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { trendingUpOutline, walletOutline, checkmarkCircleOutline, locationOutline, navigateOutline, personOutline, flash, cashOutline } from 'ionicons/icons';
