@@ -1,81 +1,52 @@
 <div class="ion-page">
-<ion-content scroll-y="true" class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white">
-  <div class="px-6 py-12 flex flex-col items-center justify-center min-h-screen">
-
-    <!-- Branding -->
-    <div class="w-full max-w-sm mb-10 text-center animate-fade-in-up">
-      <div class="mx-auto mb-6 flex justify-center">
-        <img src="assets/logos/logo-studcash-1.png" alt="studCASH Logo" class="mix-blend-multiply dark:mix-blend-normal dark:bg-white dark:rounded-xl dark:p-2" style="height: 140px; width: auto; object-fit: contain;">
+<ion-content scroll-y="true">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-blue-900 p-4">
+    <div class="w-full max-w-sm bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-2xl animate-fade-in-up">
+      
+      <div class="text-center mb-8 flex flex-col items-center">
+        <img src="assets/logos/logo-studcash-1.png" alt="studCASH Logo" class="h-32 w-auto mb-4 object-contain mix-blend-screen" style="filter: invert(1) hue-rotate(180deg) brightness(1.2);">
+        <p class="text-blue-200">Connectez-vous à votre espace marchand</p>
       </div>
-      <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">Gérez votre commerce avec simplicité</p>
-    </div>
 
-    <!-- Form Section -->
-    <div
-      class="w-full max-w-sm mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 animate-fade-in-up"
-      style="animation-delay: 100ms;">
-
-      <div class="space-y-5">
-        <!-- Email -->
-        <div>
-          <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Adresse Email</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-              <ion-icon name="mail-outline" class="text-xl"></ion-icon>
-            </div>
-            <input type="email" [(ngModel)]="credentials.email" placeholder="marchand@exemple.com"
-              class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium">
-          </div>
+      <div class="space-y-6">
+        
+        <div *ngIf="errorMessage" class="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-100 text-sm flex items-start gap-2">
+          <ion-icon name="alert-circle" class="text-xl mt-0.5 shrink-0"></ion-icon>
+          <span>{{ errorMessage }}</span>
         </div>
 
-        <!-- Password -->
         <div>
-          <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Mot de passe</label>
+          <label class="block text-sm font-medium text-blue-100 mb-2">Identifiant</label>
+          <input type="email" [(ngModel)]="credentials.email" placeholder="marchand@exemple.com"
+                 class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium placeholder-white/30">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-blue-100 mb-2">Mot de passe</label>
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-              <ion-icon name="lock-closed-outline" class="text-xl"></ion-icon>
-            </div>
             <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="credentials.password" placeholder="••••••••"
-              class="w-full pl-11 pr-11 py-3.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-medium">
-            <div class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer text-slate-400 z-10" (click)="togglePasswordVisibility()">
+                   class="w-full pl-4 pr-11 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium placeholder-white/30">
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer text-white/50 hover:text-white z-10 transition-colors" (click)="togglePasswordVisibility()">
               <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" class="text-xl"></ion-icon>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-end">
-          <a
-            class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer">Mot
-            de passe oublié ?</a>
-        </div>
+        <button (click)="onLogin()" [disabled]="isLoading" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2">
+          <ion-spinner *ngIf="isLoading" name="crescent" class="w-5 h-5"></ion-spinner>
+          <span *ngIf="!isLoading">Se connecter</span>
+          <ion-icon *ngIf="!isLoading" name="arrow-forward" class="text-xl"></ion-icon>
+        </button>
       </div>
-
-      <!-- Error -->
-      <div *ngIf="errorMessage"
-        class="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start">
-        <ion-icon name="alert-circle" class="text-red-600 dark:text-red-400 text-xl mr-2 mt-0.5"></ion-icon>
-        <span class="text-sm font-bold text-red-700 dark:text-red-400">{{ errorMessage }}</span>
+      
+      <div class="mt-6 flex flex-col gap-4 text-center">
+        <a class="text-blue-300 hover:text-white text-sm cursor-pointer transition-colors">Mot de passe oublié ?</a>
+        <p class="text-slate-400 text-sm">
+          Pas encore de compte ?
+          <a routerLink="/auth/register" routerDirection="forward" class="font-bold text-blue-400 hover:text-blue-300 cursor-pointer transition-colors">Créer un compte</a>
+        </p>
       </div>
-
-      <!-- Submit -->
-      <button (click)="onLogin()" [disabled]="isLoading"
-        class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center disabled:opacity-70 disabled:active:scale-100">
-        <ion-spinner *ngIf="isLoading" name="crescent" class="mr-2 w-5 h-5"></ion-spinner>
-        <span *ngIf="!isLoading">Se Connecter</span>
-        <ion-icon *ngIf="!isLoading" name="arrow-forward" class="ml-2 text-xl"></ion-icon>
-      </button>
-
     </div>
-
-    <!-- Register Link -->
-    <div class="mt-8 text-center animate-fade-in-up" style="animation-delay: 200ms;">
-      <p class="text-slate-500 dark:text-slate-400 font-medium">
-        Pas encore de compte ?
-        <a routerLink="/auth/register" routerDirection="forward"
-          class="font-extrabold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">Créer un compte</a>
-      </p>
-    </div>
-
   </div>
 </ion-content>
 </div>

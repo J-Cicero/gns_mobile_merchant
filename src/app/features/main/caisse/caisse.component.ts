@@ -99,12 +99,19 @@ export class CaisseComponent implements OnInit, OnDestroy, ViewWillEnter {
     });
   }
 
-  startScan() {
+  async startScan() {
     if (!this.selectedBoutiqueId || !this.amount || this.amount <= 0) {
       this.presentAlert('Erreur', 'Veuillez sélectionner une boutique et saisir un montant valide.');
       return;
     }
-    this.isScanning = true;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      this.isScanning = true;
+    } catch (err) {
+      this.presentAlert('Erreur Caméra', "Veuillez autoriser l'accès à la caméra pour scanner le QR code.");
+    }
   }
 
   stopScan() {
