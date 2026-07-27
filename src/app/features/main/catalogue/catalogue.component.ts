@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ViewWillEnter } from '@ionic/angular';
+import { IonicModule, ToastController, ViewWillEnter } from '@ionic/angular';
 import { MerchantService } from '../../../core/services/merchant.service';
 import { Produit } from '../../../core/models/boutique.model';
 import { ProductRequest } from '../../../core/models/product.model';
@@ -21,13 +21,18 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
   isLoading = false;
   errorMessage = '';
 
-  isAddProductModalOpen = false;
-  isEditProductModalOpen = false;
+  // Modaux séparés pour éviter les conflits
+  isAddModalOpen = false;
+  isEditModalOpen = false;
   newProduct: Partial<ProductRequest> = { name: '', description: '', price: 0, isAvailable: true };
   selectedProductId: string | null = null;
   isSubmittingProduct = false;
+  isTogglingId: string | null = null; // Produit en cours de basculement
 
-  constructor(private merchantService: MerchantService) { }
+  constructor(
+    private merchantService: MerchantService,
+    private toastController: ToastController
+  ) { }
   private boutiqueSub?: Subscription;
 
   ngOnInit() {
@@ -51,7 +56,7 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
 
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     this.merchantService.getProducts(selectedBoutiqueId).subscribe({
       next: (res) => {
         this.produits = res;
@@ -64,30 +69,66 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
     });
   }
 
-  openAddProductModal() {
+  openAddModal() {
+    const selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
+    if (!selectedBoutiqueId) {
+      this.showToast('Veuillez sélectionner une boutique avant d\'ajouter un produit.', 'warning');
+      return;
+    }
     this.newProduct = { name: '', description: '', price: 0, isAvailable: true };
     this.selectedProductId = null;
-    this.isAddProductModalOpen = true;
+    this.isAddModalOpen = true;
   }
 
-  closeAddProductModal() {
-    this.isAddProductModalOpen = false;
+  closeAddModal() {
+    this.isAddModalOpen = false;
+    this.newProduct = { name: '', description: '', price: 0, isAvailable: true };
   }
 
-  openEditProductModal(product: Produit) {
-    this.newProduct = { 
-      name: product.name, 
-      description: product.description, 
+  openEditModal(product: Produit) {
+    this.newProduct = {
+      name: product.name,
+      description: product.description,
       price: product.price,
       isAvailable: product.isAvailable !== false
     };
     this.selectedProductId = product.trackingId;
-    this.isEditProductModalOpen = true;
+    this.isEditModalOpen = true;
   }
 
-  closeEditProductModal() {
-    this.isEditProductModalOpen = false;
+  closeEditModal() {
+    this.isEditModalOpen = false;
     this.selectedProductId = null;
+    this.newProduct = { name: '', description: '', price: 0, isAvailable: true };
+  }
+
+  // Toggle rapide disponibilité sans ouvrir le modal
+  toggleAvailability(product: Produit, event: Event) {
+    event.stopPropagation(); // Évite d'ouvrir le modal d'édition
+    const selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
+    if (!selectedBoutiqueId) return;
+
+    this.isTogglingId = product.trackingId;
+    const req: ProductRequest = {
+      name: product.name,
+      description: product.description || '',
+      price: Number(product.price) || 0,
+      isAvailable: !product.isAvailable, // Inverser la disponibilité
+      boutiqueTrackingId: selectedBoutiqueId
+    };
+
+    (this.merchantService as any).updateProduct(product.trackingId, req).subscribe({
+      next: () => {
+        product.isAvailable = !product.isAvailable; // Mise à jour locale immédiate
+        this.isTogglingId = null;
+        const status = product.isAvailable ? 'Disponible' : 'Indisponible';
+        this.showToast(`"${product.name}" marqué comme ${status}`, 'success');
+      },
+      error: (err: any) => {
+        this.isTogglingId = null;
+        this.showToast('Erreur lors de la mise à jour du statut.', 'danger');
+      }
+    });
   }
 
   submitProduct() {
@@ -98,42 +139,51 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
     const req: ProductRequest = {
       name: this.newProduct.name!,
       description: this.newProduct.description || '',
-      price: this.newProduct.price ?? 0,
+      price: Number(this.newProduct.price) || 0, // ✅ Forcer la conversion en nombre
       isAvailable: this.newProduct.isAvailable !== false,
       boutiqueTrackingId: selectedBoutiqueId
     };
 
     if (this.selectedProductId) {
-      // Edit mode (assuming backend has updateProduct in service, we'll add it if missing)
-      if (this.merchantService['updateProduct']) {
-         // Use existing update method if we added it, but just in case fallback to add logic or implement put
-         (this.merchantService as any).updateProduct(this.selectedProductId, req).subscribe({
-           next: () => {
-             this.isSubmittingProduct = false;
-             this.closeEditProductModal();
-             this.loadProducts();
-           },
-           error: () => {
-             this.isSubmittingProduct = false;
-           }
-         });
-      } else {
-         // Workaround if update is not fully supported in service yet, ideally use PUT
-         this.isSubmittingProduct = false;
-         this.closeEditProductModal();
-      }
+      // Mode édition
+      (this.merchantService as any).updateProduct(this.selectedProductId, req).subscribe({
+        next: () => {
+          this.isSubmittingProduct = false;
+          this.closeEditModal();
+          this.loadProducts();
+          this.showToast('Produit modifié avec succès !', 'success');
+        },
+        error: (err: any) => {
+          this.isSubmittingProduct = false;
+          this.showToast(err.error?.message || 'Erreur lors de la modification.', 'danger');
+        }
+      });
     } else {
-      // Add mode
+      // Mode ajout
       this.merchantService.addProduct(req).subscribe({
         next: () => {
           this.isSubmittingProduct = false;
-          this.closeAddProductModal();
+          this.closeAddModal();
           this.loadProducts();
+          this.showToast('Produit créé avec succès !', 'success');
         },
-        error: () => {
+        error: (err: any) => {
           this.isSubmittingProduct = false;
+          this.showToast(err.error?.message || 'Erreur lors de la création.', 'danger');
         }
       });
     }
+  }
+
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2500,
+      color,
+      position: 'top',
+      cssClass: 'custom-toast',
+      buttons: [{ icon: 'close', role: 'cancel' }]
+    });
+    await toast.present();
   }
 }

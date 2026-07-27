@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ViewWillEnter } from '@ionic/angular';
+import { IonicModule, ToastController, ViewWillEnter } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -9,7 +9,7 @@ import { MerchantService } from '../../../core/services/merchant.service';
 import { MerchantResponse } from '../../../core/models/merchant.model';
 import { Boutique } from '../../../core/models/boutique.model';
 import { addIcons } from 'ionicons';
-import { addOutline, storefrontOutline, locationOutline, closeOutline } from 'ionicons/icons';
+import { addOutline, storefrontOutline, locationOutline, closeOutline, navigateOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
 
 @Component({
@@ -17,7 +17,7 @@ import { addOutline, storefrontOutline, locationOutline, closeOutline } from 'io
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule, FormsModule] // Add FormsModule
+  imports: [CommonModule, IonicModule, RouterModule, FormsModule]
 })
 export class ProfileComponent implements OnInit, ViewWillEnter {
 
@@ -40,13 +40,18 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   };
   isSubmittingBoutique = false;
 
+  // ✅ État GPS
+  isGettingLocation = false;
+  gpsLabel = ''; // Affiche la position GPS détectée
+
   constructor(
     private router: Router,
     private themeService: ThemeService,
     private authService: AuthService,
-    private merchantService: MerchantService
+    private merchantService: MerchantService,
+    private toastController: ToastController
   ) {
-    addIcons({ addOutline, storefrontOutline, locationOutline, closeOutline });
+    addIcons({ addOutline, storefrontOutline, locationOutline, closeOutline, navigateOutline, checkmarkCircleOutline });
   }
 
   ngOnInit() {
@@ -101,7 +106,6 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   onBoutiqueChange(event: any) {
     const selectedId = event.detail.value;
     this.merchantService.setSelectedBoutiqueId(selectedId);
-    // Optionally, refresh other parts of the profile that depend on the selected boutique
   }
 
   toggleTheme() {
@@ -117,17 +121,22 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   openAddBoutiqueModal() {
     this.newBoutique = { name: '', description: '' };
     this.errorMessage = '';
+    this.gpsLabel = '';
     this.isAddBoutiqueModalOpen = true;
   }
 
   closeAddBoutiqueModal() {
     this.isAddBoutiqueModalOpen = false;
+    this.gpsLabel = '';
   }
 
   openEditBoutiqueModal(boutique: Boutique) {
     this.editingBoutique = boutique;
     this.editLatitude = boutique.latitude;
     this.editLongitude = boutique.longitude;
+    this.gpsLabel = boutique.latitude && boutique.longitude
+      ? `📍 ${boutique.latitude.toFixed(5)}, ${boutique.longitude.toFixed(5)}`
+      : '';
     this.errorMessage = '';
     this.isEditBoutiqueModalOpen = true;
   }
@@ -135,6 +144,46 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
   closeEditBoutiqueModal() {
     this.isEditBoutiqueModalOpen = false;
     this.editingBoutique = null;
+    this.gpsLabel = '';
+  }
+
+  // ✅ Obtenir la position GPS actuelle du téléphone
+  async useCurrentLocation(isEdit: boolean) {
+    if (!navigator.geolocation) {
+      await this.showToast('La géolocalisation n\'est pas disponible sur cet appareil.', 'warning');
+      return;
+    }
+
+    this.isGettingLocation = true;
+    await this.showToast('📡 Obtention de votre position GPS...', 'primary', 1500);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        if (isEdit) {
+          this.editLatitude = lat;
+          this.editLongitude = lng;
+        } else {
+          this.newBoutique.latitude = lat;
+          this.newBoutique.longitude = lng;
+        }
+
+        this.gpsLabel = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        this.isGettingLocation = false;
+        await this.showToast(`✅ Position détectée : ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'success');
+      },
+      async (error) => {
+        this.isGettingLocation = false;
+        if (error.code === error.PERMISSION_DENIED) {
+          await this.showToast('⛔ Accès à la localisation refusé. Autorisez l\'accès dans les paramètres.', 'danger');
+        } else {
+          await this.showToast('⚠️ Impossible d\'obtenir votre position. Réessayez.', 'warning');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
   }
 
   submitEditBoutique() {
@@ -150,24 +199,24 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
     };
 
     this.merchantService.updateBoutique(this.editingBoutique.trackingId, request).subscribe({
-      next: () => {
+      next: async () => {
         this.isSubmittingBoutique = false;
         this.closeEditBoutiqueModal();
         const merchantId = this.authService.getCurrentMerchantId();
-        if (merchantId) {
-          this.loadBoutiques(merchantId); // Refresh list
-        }
+        if (merchantId) this.loadBoutiques(merchantId);
+        await this.showToast('✅ Position de la boutique mise à jour !', 'success');
       },
-      error: (err) => {
+      error: async (err) => {
         this.isSubmittingBoutique = false;
-        this.errorMessage = err.error?.message || 'Erreur lors de la mise à jour de la boutique.';
+        const msg = err.error?.message || 'Erreur lors de la mise à jour.';
+        await this.showToast(`❌ ${msg}`, 'danger');
       }
     });
   }
 
   submitNewBoutique() {
     if (!this.newBoutique.name || !this.newBoutique.description) {
-      this.errorMessage = 'Veuillez remplir tous les champs.';
+      this.showToast('Veuillez remplir le nom et la description.', 'warning');
       return;
     }
 
@@ -187,15 +236,28 @@ export class ProfileComponent implements OnInit, ViewWillEnter {
     };
 
     this.merchantService.createBoutique(request).subscribe({
-      next: (boutique) => {
+      next: async () => {
         this.isSubmittingBoutique = false;
         this.closeAddBoutiqueModal();
-        this.loadBoutiques(merchantId); // Refresh list
+        this.loadBoutiques(merchantId);
+        await this.showToast('✅ Boutique créée avec succès !', 'success');
       },
-      error: (err) => {
+      error: async (err) => {
         this.isSubmittingBoutique = false;
-        this.errorMessage = err.error?.message || 'Erreur lors de la création de la boutique.';
+        const msg = err.error?.message || 'Erreur lors de la création.';
+        await this.showToast(`❌ ${msg}`, 'danger');
       }
     });
+  }
+
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary', duration: number = 3000) {
+    const toast = await this.toastController.create({
+      message,
+      duration,
+      color,
+      position: 'top',
+      buttons: [{ icon: 'close', role: 'cancel' }]
+    });
+    await toast.present();
   }
 }

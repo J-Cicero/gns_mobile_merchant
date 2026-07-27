@@ -141,22 +141,28 @@ export class DashboardComponent implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   loadSalesStats(boutiqueTrackingId: string) {
-    this.transactionService.getSalesHistory(boutiqueTrackingId, 0, 10).subscribe({
+    // Charger jusqu'à 50 transactions pour couvrir les ventes du jour
+    this.transactionService.getSalesHistory(boutiqueTrackingId, 0, 50).subscribe({
       next: (res: Page<TransactionResponse>) => {
         const today = new Date();
         const todaySales = (res.content || []).filter(tx => {
           const txDate = new Date(tx.createdAt);
           return txDate.toDateString() === today.toDateString() && tx.status === 'VALIDE';
         });
-        this.ventesJour = todaySales.reduce((sum, tx) => sum + tx.amount, 0);
+        // Utiliser amountCredited (montant réellement crédité à la boutique)
+        this.ventesJour = todaySales.reduce((sum, tx) => sum + (tx.amountCredited || tx.amount || 0), 0);
         this.nombreVentesJour = todaySales.length;
-        this.recentTransactions = res.content || [];
+        // Les ventes récentes = toutes les transactions (pas seulement du jour)
+        this.recentTransactions = (res.content || []).slice(0, 10);
         const uniqueClients = new Set(todaySales.map(tx => tx.senderTrackingId));
         this.clientsUniques = uniqueClients.size;
+        console.log('[Dashboard] Ventes du jour:', this.ventesJour, 'FCFA sur', this.nombreVentesJour, 'transaction(s)');
       },
       error: (err) => {
         // Ne pas bloquer l'UI si les transactions échouent
         console.warn('[Dashboard] Erreur chargement transactions:', err.error?.message || err.message);
+        this.ventesJour = 0;
+        this.nombreVentesJour = 0;
         this.recentTransactions = [];
       }
     });

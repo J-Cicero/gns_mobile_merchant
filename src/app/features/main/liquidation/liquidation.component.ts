@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, ViewWillEnter } from '@ionic/angular';
 import { MerchantService } from '../../../core/services/merchant.service';
 import { TransactionService } from '../../../core/services/transaction.service';
-import { LiquidationRequest } from '../../../core/models/liquidation.model';
+import { LiquidationService } from '../../../core/services/liquidation.service';
+import { LiquidationRequest, LiquidationResponse } from '../../../core/models/liquidation.model';
 import { TransactionResponse } from '../../../core/models/transaction.model';
 import { Page } from '../../../core/models/page.model';
 import { addIcons } from 'ionicons';
-import { walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline } from 'ionicons/icons';
+import {
+  walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline,
+  documentTextOutline, printOutline, closeOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-liquidation',
@@ -16,20 +20,32 @@ import { walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline 
   standalone: true,
   imports: [CommonModule, IonicModule]
 })
-export class LiquidationComponent implements OnInit {
+export class LiquidationComponent implements OnInit, ViewWillEnter {
 
   montantDisponible: number = 0;
+  boutiqueName: string = '';
   pendingTransactions: TransactionResponse[] = [];
   isLoading = true;
   isSubmitting = false;
   selectedBoutiqueId: string | null = null;
 
+  // ✅ Reçu après liquidation réussie
+  showReceipt: boolean = false;
+  lastLiquidation: LiquidationResponse | null = null;
+
+  // Historique des liquidations de la boutique
+  liquidationHistory: LiquidationResponse[] = [];
+
   constructor(
     private merchantService: MerchantService,
     private transactionService: TransactionService,
+    private liquidationService: LiquidationService,
     private toastController: ToastController
   ) {
-    addIcons({ walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline });
+    addIcons({
+      walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline,
+      documentTextOutline, printOutline, closeOutline
+    });
   }
 
   ngOnInit() {
@@ -41,20 +57,34 @@ export class LiquidationComponent implements OnInit {
     }
   }
 
+  ionViewWillEnter() {
+    this.selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
+    if (this.selectedBoutiqueId) {
+      this.loadLiquidationData();
+    }
+  }
+
   loadLiquidationData() {
     this.isLoading = true;
-    
-    // First, let's load the boutique to get balance/wallet info
+
     this.merchantService.getBoutiqueById(this.selectedBoutiqueId!).subscribe({
       next: (boutique) => {
-        this.montantDisponible = boutique.balance || 0;
-        
-        // Load pending transactions or sales history
+        // ✅ Corriger le mapping du solde (même pattern que le dashboard)
+        this.montantDisponible = Number((boutique as any).solde ?? boutique.balance) || 0;
+        this.boutiqueName = boutique.name || '';
+
+        console.log('[Liquidation] Solde boutique:', this.montantDisponible, 'FCFA');
+
+        // Charger l'historique des liquidations
+        this.loadLiquidationHistory();
+
+        // Charger les transactions non liquidées
         this.transactionService.getSalesHistory(this.selectedBoutiqueId!, 0, 20).subscribe({
           next: (res: Page<TransactionResponse>) => {
-            // For UI purposes, we'll assume we show the recent ones.
-            // Ideally backend filters by status, but we'll show them and style them.
-            this.pendingTransactions = res.content || [];
+            // Transactions VALIDE et non encore liquidées
+            this.pendingTransactions = (res.content || []).filter(
+              tx => tx.status === 'VALIDE' && (!tx.isCommissionPaid || (tx.isCommissionPaid as any) === null)
+            );
             this.isLoading = false;
           },
           error: () => {
@@ -64,6 +94,26 @@ export class LiquidationComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
+        this.showToast('Erreur lors du chargement des données.', 'danger');
+      }
+    });
+  }
+
+  loadLiquidationHistory() {
+    if (!this.selectedBoutiqueId) return;
+    this.liquidationService.findByBoutiqueId(this.selectedBoutiqueId).subscribe({
+      next: (res: any) => {
+        // Peut être un tableau ou un objet Page
+        if (res && res.content) {
+          this.liquidationHistory = res.content;
+        } else if (Array.isArray(res)) {
+          this.liquidationHistory = res;
+        } else {
+          this.liquidationHistory = [];
+        }
+      },
+      error: () => {
+        this.liquidationHistory = [];
       }
     });
   }
@@ -78,9 +128,11 @@ export class LiquidationComponent implements OnInit {
     };
 
     this.merchantService.requestLiquidation(request).subscribe({
-      next: () => {
+      next: (response: LiquidationResponse) => {
         this.isSubmitting = false;
-        this.showToast('Demande de liquidation envoyée avec succès', 'success');
+        // ✅ Stocker la réponse et afficher le reçu
+        this.lastLiquidation = response;
+        this.showReceipt = true;
         this.loadLiquidationData();
       },
       error: (err) => {
@@ -90,12 +142,17 @@ export class LiquidationComponent implements OnInit {
     });
   }
 
-  async showToast(message: string, color: string) {
+  closeReceipt() {
+    this.showReceipt = false;
+  }
+
+  async showToast(message: string, color: 'success' | 'danger' | 'warning') {
     const toast = await this.toastController.create({
       message,
       duration: 3000,
       color,
-      position: 'top'
+      position: 'top',
+      buttons: [{ icon: 'close', role: 'cancel' }]
     });
     toast.present();
   }
@@ -104,6 +161,24 @@ export class LiquidationComponent implements OnInit {
     this.loadLiquidationData();
     setTimeout(() => {
       event.target.complete();
-    }, 1000);
+    }, 1200);
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'EN_ATTENTE': return 'En attente';
+      case 'VALIDEE': return 'Validée';
+      case 'REJETEE': return 'Rejetée';
+      default: return status;
+    }
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'EN_ATTENTE': return 'amber';
+      case 'VALIDEE': return 'emerald';
+      case 'REJETEE': return 'red';
+      default: return 'slate';
+    }
   }
 }

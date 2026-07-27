@@ -17,7 +17,7 @@
     <!-- Loading -->
     <div *ngIf="isLoading" class="flex flex-col items-center justify-center flex-1">
       <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-      <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Chargement...</p>
+      <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Traitement en cours...</p>
     </div>
 
     <!-- No boutique -->
@@ -72,7 +72,8 @@
             class="py-2 text-sm font-bold rounded-xl border-2 transition-all active:scale-95
                    border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300
                    bg-slate-50 dark:bg-slate-900
-                   hover:border-blue-500 hover:text-blue-600">
+                   hover:border-blue-500 hover:text-blue-600"
+            [ngClass]="amount === preset ? 'border-blue-500 text-blue-600 bg-blue-50 dark:bg-blue-900/20' : ''">
             {{ preset | number:'1.0-0' }}
           </button>
         </div>
@@ -85,81 +86,42 @@
           Scanner le QR Code Étudiant
         </h3>
 
-        <!-- PIN entry after scan -->
-        <div *ngIf="scannedStudentId"
-          class="p-5 bg-blue-50 dark:bg-blue-900/30 rounded-2xl border border-blue-100 dark:border-blue-800">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-              <ion-icon name="checkmark-circle-outline" class="text-green-600 dark:text-green-400 text-2xl"></ion-icon>
-            </div>
-            <div>
-              <p class="text-sm font-extrabold text-slate-900 dark:text-white">Étudiant identifié</p>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Saisissez son code PIN pour valider</p>
-            </div>
-          </div>
-
-          <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Code PIN étudiant</label>
-          <input
-            type="password"
-            inputmode="numeric"
-            maxlength="6"
-            [(ngModel)]="studentPin"
-            placeholder="••••••"
-            class="w-full px-4 py-4 text-center text-2xl font-black tracking-[0.5em]
-                   bg-white dark:bg-slate-800
-                   border-2 border-slate-200 dark:border-slate-600
-                   rounded-2xl
-                   focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20
-                   text-slate-900 dark:text-white
-                   placeholder-slate-300 dark:placeholder-slate-600
-                   transition-all"
-          >
-
-          <button (click)="processPayment()" [disabled]="isLoading || !studentPin || studentPin.length < 4"
-            class="w-full mt-4 py-4 bg-green-600 hover:bg-green-700 text-white font-black rounded-2xl
-                   shadow-lg shadow-green-600/30 transition-all active:scale-95
-                   disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2">
-            <div *ngIf="isLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span *ngIf="!isLoading">✓ Valider le paiement — {{ amount | number:'1.0-0' }} FCFA</span>
-          </button>
-          <button (click)="resetPayment()"
-            class="w-full mt-3 py-3 text-slate-500 dark:text-slate-400 font-bold text-sm rounded-xl
-                   hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            Annuler
-          </button>
-        </div>
-
         <!-- Camera view -->
-        <div *ngIf="!scannedStudentId">
-          <div class="relative rounded-2xl overflow-hidden bg-black aspect-square">
-            <zxing-scanner
-              [enable]="isScanning"
-              (scanSuccess)="onCodeResult($event)"
-              (camerasFound)="onHasDevices($event)"
-              (permissionResponse)="onHasPermission($event)">
-            </zxing-scanner>
-            <!-- Viewfinder overlay -->
-            <div class="absolute inset-0 pointer-events-none">
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-48 h-48 border-4 border-white/60 rounded-3xl"></div>
-              </div>
-              <div class="absolute top-4 inset-x-4 text-center">
-                <p class="text-white text-xs font-bold bg-black/40 px-3 py-1.5 rounded-full inline-block">
-                  Centrez le QR code dans le cadre
-                </p>
+        <div class="relative rounded-2xl overflow-hidden bg-black aspect-square">
+          <zxing-scanner
+            [enable]="isScanning"
+            [formats]="allowedFormats"
+            (scanSuccess)="onCodeResult($event)"
+            (camerasFound)="onHasDevices($event)"
+            (permissionResponse)="onHasPermission($event)">
+          </zxing-scanner>
+          <!-- Viewfinder overlay -->
+          <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-48 h-48 border-4 border-white/60 rounded-3xl">
+                <!-- Coin indicators -->
+                <div class="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>
+                <div class="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-blue-400 rounded-tr-lg"></div>
+                <div class="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-blue-400 rounded-bl-lg"></div>
+                <div class="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-blue-400 rounded-br-lg"></div>
               </div>
             </div>
-            <div *ngIf="!hasPermission && !hasDevices"
-              class="absolute inset-0 flex items-center justify-center bg-black/80">
-              <p class="text-white text-center text-sm font-bold px-6">Accès à la caméra refusé ou introuvable.</p>
+            <div class="absolute top-4 inset-x-4 text-center">
+              <p class="text-white text-xs font-bold bg-black/40 px-3 py-1.5 rounded-full inline-block">
+                Centrez le QR code dans le cadre
+              </p>
             </div>
           </div>
-          <button (click)="stopScan()"
-            class="mt-4 w-full py-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300
-                   font-bold rounded-2xl transition-colors active:scale-95">
-            ✕ Annuler le scan
-          </button>
+          <div *ngIf="!hasPermission && !hasDevices"
+            class="absolute inset-0 flex items-center justify-center bg-black/80">
+            <p class="text-white text-center text-sm font-bold px-6">Accès à la caméra refusé ou introuvable.</p>
+          </div>
         </div>
+        <button (click)="stopScan()"
+          class="mt-4 w-full py-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300
+                 font-bold rounded-2xl transition-colors active:scale-95">
+          ✕ Annuler le scan
+        </button>
       </div>
 
       <!-- Action Button -->
@@ -175,7 +137,7 @@
         </button>
 
         <!-- Amount reminder when scanning -->
-        <div *ngIf="isScanning && !scannedStudentId"
+        <div *ngIf="isScanning"
           class="flex items-center justify-center gap-2 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
           <ion-icon name="cash-outline" class="text-blue-500 text-xl"></ion-icon>
           <span class="text-base font-extrabold text-blue-700 dark:text-blue-400">
@@ -187,3 +149,109 @@
     </div>
   </div>
 </ion-content>
+
+<!-- ✅ MODAL PIN — s'ouvre automatiquement après scan -->
+<ion-modal
+  [isOpen]="isPinModalOpen"
+  [backdropDismiss]="false"
+  (didDismiss)="closePinModal()"
+  [breakpoints]="[0, 0.55]"
+  [initialBreakpoint]="0.55">
+
+  <ng-template>
+    <ion-content class="bg-white dark:bg-slate-900">
+      <div class="px-6 pt-6 pb-8 flex flex-col h-full">
+
+        <!-- Header du modal -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center">
+              <ion-icon name="checkmark-circle-outline" class="text-green-600 dark:text-green-400 text-2xl"></ion-icon>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-slate-900 dark:text-white">QR Scanné ✅</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                {{ scannedStudentName || 'Étudiant identifié' }}
+              </p>
+            </div>
+          </div>
+          <button (click)="closePinModal()" class="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+            <ion-icon name="close-circle-outline" class="text-slate-500 text-lg"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Montant rappel -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 mb-5 flex items-center justify-between">
+          <span class="text-sm font-bold text-blue-700 dark:text-blue-300">Montant à encaisser</span>
+          <span class="text-xl font-black text-blue-700 dark:text-blue-400">
+            {{ amount | number:'1.0-0' }} FCFA
+          </span>
+        </div>
+
+        <!-- Tentatives restantes -->
+        <div *ngIf="pinAttempts > 0"
+          class="mb-4 p-3 rounded-xl flex items-center gap-2"
+          [ngClass]="remainingAttempts <= 1
+            ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+            : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'">
+          <ion-icon name="alert-circle-outline"
+            [ngClass]="remainingAttempts <= 1 ? 'text-red-500' : 'text-amber-500'"
+            class="text-lg shrink-0"></ion-icon>
+          <p class="text-sm font-bold"
+            [ngClass]="remainingAttempts <= 1 ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'">
+            PIN incorrect — {{ remainingAttempts }} tentative(s) restante(s)
+          </p>
+        </div>
+
+        <!-- Input PIN -->
+        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+          Code PIN de l'étudiant
+        </label>
+        <input
+          type="password"
+          inputmode="numeric"
+          maxlength="6"
+          [(ngModel)]="studentPin"
+          placeholder="••••••"
+          [disabled]="isLoading"
+          class="w-full px-4 py-4 text-center text-2xl font-black tracking-[0.5em]
+                 bg-slate-50 dark:bg-slate-800
+                 border-2 border-slate-200 dark:border-slate-600
+                 rounded-2xl
+                 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20
+                 text-slate-900 dark:text-white
+                 placeholder-slate-300 dark:placeholder-slate-600
+                 transition-all mb-5"
+        >
+
+        <!-- Dots indicator -->
+        <div class="flex justify-center gap-2 mb-6">
+          <div *ngFor="let i of [1,2,3,4,5,6]"
+            class="w-2.5 h-2.5 rounded-full transition-all duration-200"
+            [ngClass]="studentPin.length >= i
+              ? 'bg-blue-600 scale-110'
+              : 'bg-slate-200 dark:bg-slate-700'">
+          </div>
+        </div>
+
+        <!-- Valider -->
+        <button (click)="processPayment()"
+          [disabled]="isLoading || !studentPin || studentPin.length < 4"
+          class="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-black rounded-2xl
+                 shadow-lg shadow-green-600/30 transition-all active:scale-95
+                 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2">
+          <div *ngIf="isLoading" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span *ngIf="!isLoading">✓ Valider le paiement</span>
+          <span *ngIf="isLoading">Traitement...</span>
+        </button>
+
+        <button (click)="closePinModal()" [disabled]="isLoading"
+          class="w-full mt-3 py-3 text-slate-500 dark:text-slate-400 font-bold text-sm rounded-xl
+                 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40">
+          Annuler
+        </button>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

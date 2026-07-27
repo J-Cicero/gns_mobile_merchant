@@ -51,7 +51,7 @@
           <div class="p-5 space-y-3">
             <div *ngIf="boutiques.length === 0 && !isLoading" class="text-center text-sm text-slate-500 dark:text-slate-400">Aucune boutique enregistrée.</div>
 
-            <!-- Radio Group for boutique selection -->
+            <!-- Indicateur GPS dans la liste -->
             <ion-radio-group *ngIf="boutiques.length > 0" [value]="selectedBoutiqueId" (ionChange)="onBoutiqueChange($event)">
               <div *ngFor="let boutique of boutiques"
                 class="flex items-center justify-between p-4 rounded-xl border transition-all mb-2"
@@ -66,12 +66,26 @@
                   <div>
                     <p class="font-bold text-slate-900 dark:text-white text-sm">{{ boutique.name }}</p>
                     <p class="text-xs text-slate-500 dark:text-slate-400">{{ boutique.description }}</p>
+                    <!-- ✅ Indicateur GPS -->
+                    <div class="mt-0.5 flex items-center gap-1">
+                      <span *ngIf="boutique.latitude && boutique.longitude"
+                        class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                        <ion-icon name="checkmark-circle-outline" class="text-xs"></ion-icon>
+                        Position GPS enregistrée
+                      </span>
+                      <span *ngIf="!boutique.latitude || !boutique.longitude"
+                        class="text-[9px] font-bold text-amber-500 flex items-center gap-0.5">
+                        <ion-icon name="location-outline" class="text-xs"></ion-icon>
+                        Pas de position GPS
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
                   <!-- Edit lat/lng button -->
                   <button (click)="openEditBoutiqueModal(boutique)"
-                    class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-100 hover:text-blue-600 transition-colors">
+                    class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                    [title]="boutique.latitude ? 'Mettre à jour la position GPS' : 'Ajouter la position GPS'">
                     <ion-icon name="location-outline" class="text-base"></ion-icon>
                   </button>
                   <ion-radio [value]="boutique.trackingId"
@@ -142,7 +156,7 @@
           <div *ngIf="errorMessage" class="p-4 bg-red-50 text-red-700 font-bold text-sm rounded-xl">
             {{ errorMessage }}
           </div>
-          
+
           <div>
             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nom de la boutique</label>
             <input type="text" [(ngModel)]="newBoutique.name" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Ex: Mon Super Store">
@@ -153,18 +167,47 @@
             <textarea [(ngModel)]="newBoutique.description" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Que vendez-vous ?"></textarea>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Latitude</label>
-              <input type="number" [(ngModel)]="newBoutique.latitude" placeholder="Ex: 6.1366" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          <!-- ✅ Section Position GPS -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Position GPS
+              <span class="text-slate-400 font-medium text-xs ml-1">(optionnel)</span>
+            </label>
+
+            <!-- Bouton détection automatique -->
+            <button (click)="useCurrentLocation(false)" [disabled]="isGettingLocation"
+              class="w-full py-3 mb-2 border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20
+                     text-blue-700 dark:text-blue-400 font-bold text-sm rounded-xl
+                     flex items-center justify-center gap-2 active:scale-95 transition-all
+                     disabled:opacity-50">
+              <div *ngIf="isGettingLocation" class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <ion-icon *ngIf="!isGettingLocation" name="navigate-outline" class="text-lg"></ion-icon>
+              <span>{{ isGettingLocation ? 'Détection en cours...' : 'Utiliser ma position actuelle' }}</span>
+            </button>
+
+            <!-- Affichage de la position détectée -->
+            <div *ngIf="gpsLabel"
+              class="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+              <ion-icon name="checkmark-circle-outline" class="text-emerald-500 text-lg shrink-0"></ion-icon>
+              <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400">{{ gpsLabel }}</p>
             </div>
-            <div>
-              <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Longitude</label>
-              <input type="number" [(ngModel)]="newBoutique.longitude" placeholder="Ex: 1.2222" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+
+            <!-- Saisie manuelle -->
+            <div class="grid grid-cols-2 gap-3 mt-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Latitude</label>
+                <input type="number" [(ngModel)]="newBoutique.latitude" placeholder="Ex: 6.1366"
+                  class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Longitude</label>
+                <input type="number" [(ngModel)]="newBoutique.longitude" placeholder="Ex: 1.2222"
+                  class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+              </div>
             </div>
           </div>
 
-          <button (click)="submitNewBoutique()" [disabled]="isSubmittingBoutique || !newBoutique.name" class="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center">
+          <button (click)="submitNewBoutique()" [disabled]="isSubmittingBoutique || !newBoutique.name"
+            class="w-full py-4 mt-2 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center disabled:opacity-50">
             <span *ngIf="!isSubmittingBoutique">Créer la boutique</span>
             <div *ngIf="isSubmittingBoutique" class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           </button>
@@ -185,10 +228,39 @@
         </ion-toolbar>
       </ion-header>
       <ion-content class="bg-slate-50 dark:bg-slate-900 px-6 py-6">
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
-          Mise à jour de la position de <strong class="text-slate-900 dark:text-white">{{ editingBoutique?.name }}</strong>
+        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 mb-1">
+          {{ editingBoutique?.name }}
+        </p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
+          Mettez à jour la position GPS de cette boutique pour que les étudiants puissent vous localiser.
         </p>
         <div class="space-y-4">
+
+          <!-- ✅ Bouton GPS automatique -->
+          <button (click)="useCurrentLocation(true)" [disabled]="isGettingLocation"
+            class="w-full py-3.5 border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20
+                   text-blue-700 dark:text-blue-400 font-bold text-sm rounded-xl
+                   flex items-center justify-center gap-2 active:scale-95 transition-all
+                   disabled:opacity-50">
+            <div *ngIf="isGettingLocation" class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <ion-icon *ngIf="!isGettingLocation" name="navigate-outline" class="text-xl"></ion-icon>
+            <span>{{ isGettingLocation ? 'Détection GPS en cours...' : '📍 Utiliser ma position actuelle' }}</span>
+          </button>
+
+          <!-- Affichage de la position -->
+          <div *ngIf="gpsLabel"
+            class="flex items-center gap-2 px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+            <ion-icon name="checkmark-circle-outline" class="text-emerald-500 text-xl shrink-0"></ion-icon>
+            <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400">{{ gpsLabel }}</p>
+          </div>
+
+          <!-- Ou saisie manuelle -->
+          <div class="flex items-center gap-3">
+            <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+            <span class="text-xs text-slate-400 font-medium">ou saisir manuellement</span>
+            <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Latitude</label>
@@ -201,9 +273,10 @@
                 class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
           </div>
+
           <button (click)="submitEditBoutique()" [disabled]="isSubmittingBoutique"
-            class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center">
-            <span *ngIf="!isSubmittingBoutique">Enregistrer la position</span>
+            class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center disabled:opacity-50">
+            <span *ngIf="!isSubmittingBoutique">💾 Enregistrer la position</span>
             <div *ngIf="isSubmittingBoutique" class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           </button>
         </div>

@@ -75,13 +75,15 @@ export class SalesHistoryComponent implements OnInit, ViewWillEnter {
   }
 
   get totalNonLiquidated(): number {
+    // ✅ Traiter null comme false (backend peut retourner null au lieu de false)
     return this.transactions
-      .filter(tx => !tx.isCommissionPaid)
-      .reduce((sum, tx) => sum + tx.amountCredited, 0);
+      .filter(tx => !tx.isCommissionPaid || tx.isCommissionPaid === null)
+      .reduce((sum, tx) => sum + (tx.amountCredited || tx.amount || 0), 0);
   }
 
   get nonLiquidatedList(): TransactionResponse[] {
-    return this.transactions.filter(tx => !tx.isCommissionPaid);
+    // ✅ Inclure les transactions où isCommissionPaid est null ou false
+    return this.transactions.filter(tx => !tx.isCommissionPaid || (tx.isCommissionPaid as any) === null);
   }
 
   get hasMore(): boolean {
