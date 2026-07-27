@@ -104,29 +104,30 @@ export class CatalogueComponent implements OnInit, OnDestroy, ViewWillEnter {
 
   // Toggle rapide disponibilité sans ouvrir le modal
   toggleAvailability(product: Produit, event: Event) {
-    event.stopPropagation(); // Évite d'ouvrir le modal d'édition
+    event.stopPropagation();
     const selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
     if (!selectedBoutiqueId) return;
 
+    const newStatus = product.isAvailable === false ? true : false;
     this.isTogglingId = product.trackingId;
     const req: ProductRequest = {
       name: product.name,
       description: product.description || '',
       price: Number(product.price) || 0,
-      isAvailable: !product.isAvailable, // Inverser la disponibilité
+      isAvailable: newStatus,
       boutiqueTrackingId: selectedBoutiqueId
     };
 
-    (this.merchantService as any).updateProduct(product.trackingId, req).subscribe({
-      next: () => {
-        product.isAvailable = !product.isAvailable; // Mise à jour locale immédiate
+    this.merchantService.updateProduct(product.trackingId, req).subscribe({
+      next: (res) => {
+        product.isAvailable = newStatus;
         this.isTogglingId = null;
-        const status = product.isAvailable ? 'Disponible' : 'Indisponible';
-        this.showToast(`"${product.name}" marqué comme ${status}`, 'success');
+        const statusLabel = newStatus ? 'Disponible' : 'Indisponible';
+        this.showToast(`"${product.name}" est maintenant ${statusLabel}`, 'success');
       },
       error: (err: any) => {
         this.isTogglingId = null;
-        this.showToast('Erreur lors de la mise à jour du statut.', 'danger');
+        this.showToast(err.error?.message || 'Erreur lors de la mise à jour du statut.', 'danger');
       }
     });
   }
