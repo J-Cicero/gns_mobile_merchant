@@ -25,6 +25,8 @@ export class SalesHistoryComponent implements OnInit, ViewWillEnter {
   totalPages = 1;
   isLoadingMore = false;
 
+  boutiqueSolde: number = 0;
+
   constructor(
     private transactionService: TransactionService,
     private merchantService: MerchantService
@@ -38,7 +40,20 @@ export class SalesHistoryComponent implements OnInit, ViewWillEnter {
     this.transactions = [];
     this.currentPage = 0;
     this.boutiqueId = this.merchantService.getSelectedBoutiqueId();
+    this.loadBoutiqueInfo();
     this.loadTransactions();
+  }
+
+  loadBoutiqueInfo() {
+    if (!this.boutiqueId) return;
+    this.merchantService.getBoutiqueById(this.boutiqueId).subscribe({
+      next: (b: any) => {
+        if (b) {
+          this.boutiqueSolde = Number(b.solde ?? b.balance ?? 0);
+        }
+      },
+      error: (err) => console.log('Erreur chargement boutique info:', err)
+    });
   }
 
   loadTransactions() {
@@ -75,10 +90,11 @@ export class SalesHistoryComponent implements OnInit, ViewWillEnter {
   }
 
   get totalNonLiquidated(): number {
-    // ✅ Traiter null comme false (backend peut retourner null au lieu de false)
-    return this.transactions
-      .filter(tx => !tx.isCommissionPaid || tx.isCommissionPaid === null)
-      .reduce((sum, tx) => sum + (tx.amountCredited || tx.amount || 0), 0);
+    const sum = this.transactions
+      .filter(tx => !tx.isCommissionPaid || (tx.isCommissionPaid as any) === null)
+      .reduce((s, tx) => s + (Number(tx.amountCredited) || Number(tx.amount) || 0), 0);
+    
+    return sum > 0 ? sum : (this.boutiqueSolde || 0);
   }
 
   get nonLiquidatedList(): TransactionResponse[] {
