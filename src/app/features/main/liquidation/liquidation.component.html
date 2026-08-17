@@ -7,107 +7,165 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="bg-slate-900 custom-bg">
+<ion-content class="bg-slate-900">
   <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <div class="px-5 py-6">
+  <div class="px-4 py-5">
 
     <!-- Loading -->
-    <div *ngIf="isLoading" class="flex justify-center py-16">
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-20 gap-4">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="text-slate-400 text-sm font-medium">Chargement des ventes...</p>
     </div>
 
     <div *ngIf="!isLoading">
 
-      <!-- ✅ KPI Card — Solde disponible -->
-      <div class="kpi-card mb-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-semibold tracking-wider text-slate-300 uppercase">Solde Disponible</h2>
-          <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-            <ion-icon name="wallet-outline" class="text-xl text-blue-400"></ion-icon>
+      <!-- KPI Card — Total des ventes disponibles -->
+      <div class="bg-gradient-to-br from-blue-700 to-indigo-800 rounded-3xl p-5 mb-5 relative overflow-hidden shadow-2xl shadow-indigo-900/50">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-8 -mb-8 blur-xl"></div>
+        
+        <div class="relative z-10">
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-2">
+              <ion-icon name="wallet-outline" class="text-blue-200 text-lg"></ion-icon>
+              <span class="text-blue-100 text-xs font-bold uppercase tracking-widest">Total Disponible à Liquider</span>
+            </div>
+            <span class="px-2.5 py-1 bg-white/15 border border-white/20 rounded-full text-[10px] font-bold text-blue-100">
+              {{ boutiqueName }}
+            </span>
           </div>
-        </div>
-        <div class="flex items-end mb-1">
-          <span class="text-4xl font-black text-white tracking-tight">{{ montantDisponible | number:'1.0-0':'fr-FR' }}</span>
-          <span class="text-lg font-bold text-slate-400 ml-2 mb-1">FCFA</span>
-        </div>
-        <p class="text-xs text-slate-400">{{ boutiqueName }}</p>
-        <div class="mt-3 pt-3 border-t border-slate-700">
-          <p class="text-xs text-slate-400">
-            {{ pendingTransactions.length }} vente(s) en attente de liquidation
-          </p>
+
+          <div class="mb-3">
+            <h2 class="text-4xl font-black text-white tracking-tight">
+              {{ formatAmount(totalPending) }}
+              <span class="text-xl font-bold text-blue-200 ml-1">FCFA</span>
+            </h2>
+            <p class="text-blue-300 text-xs font-medium mt-1">{{ pendingTransactions.length }} vente(s) en attente</p>
+          </div>
+
+          <!-- Selected sum indicator -->
+          <div *ngIf="selectedIds.size > 0" class="mt-3 pt-3 border-t border-white/20">
+            <div class="flex justify-between items-center">
+              <span class="text-blue-200 text-xs font-medium">{{ selectedIds.size }} sélectionnée(s)</span>
+              <span class="text-white font-black text-lg">{{ formatAmount(selectedTotal) }} FCFA</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ✅ Bouton Liquidation -->
-      <div class="mb-8">
+      <!-- Bouton de liquidation principal (sticky-like) -->
+      <div class="mb-5">
         <button
           (click)="requestLiquidation()"
-          [disabled]="isSubmitting || montantDisponible <= 0 || !selectedBoutiqueId"
-          class="w-full py-4 rounded-xl font-bold text-white transition-all duration-300 shadow-lg flex justify-center items-center"
-          [ngClass]="(isSubmitting || montantDisponible <= 0 || !selectedBoutiqueId)
+          [disabled]="isSubmitting || selectedIds.size === 0 || !selectedBoutiqueId"
+          class="w-full py-4 rounded-2xl font-black text-base transition-all duration-200 shadow-xl flex justify-center items-center gap-2"
+          [ngClass]="(isSubmitting || selectedIds.size === 0 || !selectedBoutiqueId)
             ? 'bg-slate-700 text-slate-400 cursor-not-allowed border border-slate-600'
-            : 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30 active:scale-95'">
-          <ion-spinner *ngIf="isSubmitting" name="crescent" class="mr-2 w-5 h-5"></ion-spinner>
-          <ion-icon *ngIf="!isSubmitting" name="wallet-outline" class="mr-2 text-xl"></ion-icon>
-          <span *ngIf="!isSubmitting">Demander la Liquidation</span>
+            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/40 active:scale-95'">
+          <ion-spinner *ngIf="isSubmitting" name="crescent" class="w-5 h-5"></ion-spinner>
+          <ion-icon *ngIf="!isSubmitting" name="wallet-outline" class="text-xl"></ion-icon>
+          <span *ngIf="!isSubmitting && selectedIds.size === 0">Sélectionnez des ventes à liquider</span>
+          <span *ngIf="!isSubmitting && selectedIds.size > 0">
+            Demander la Liquidation — {{ formatAmount(selectedTotal) }} FCFA
+          </span>
           <span *ngIf="isSubmitting">Traitement en cours...</span>
         </button>
-        <p *ngIf="montantDisponible <= 0" class="text-center text-xs text-slate-500 mt-3 font-medium">
-          <ion-icon name="alert-circle-outline" class="inline align-text-bottom mr-1"></ion-icon>
-          Le solde doit être supérieur à 0 pour liquider.
-        </p>
       </div>
 
-      <!-- ✅ Transactions en attente -->
-      <div class="mb-8">
-        <h3 class="text-base font-bold text-white mb-4 tracking-wide">Ventes à Liquider</h3>
-
-        <div *ngIf="pendingTransactions.length === 0" class="bg-slate-800 border border-slate-700 rounded-xl p-6 text-center">
-          <ion-icon name="checkmark-circle-outline" class="text-4xl text-emerald-500 mb-2"></ion-icon>
-          <p class="text-slate-300 font-medium">Aucune vente en attente.</p>
-          <p class="text-slate-500 text-xs mt-1">Tout a été liquidé.</p>
+      <!-- Section: Ventes à sélectionner -->
+      <div class="mb-6">
+        <!-- Header avec Tout sélectionner -->
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-white tracking-wide uppercase">
+            Ventes Non Liquidées
+            <span class="text-slate-400 font-normal text-xs ml-1">({{ pendingTransactions.length }})</span>
+          </h3>
+          <button *ngIf="pendingTransactions.length > 0"
+            (click)="toggleSelectAll()"
+            class="flex items-center gap-1.5 text-xs font-bold transition-colors"
+            [ngClass]="allSelected ? 'text-indigo-400' : 'text-slate-400 hover:text-indigo-400'">
+            <ion-icon [name]="allSelected ? 'checkbox-outline' : 'square-outline'" class="text-base"></ion-icon>
+            {{ allSelected ? 'Désélectionner tout' : 'Tout sélectionner' }}
+          </button>
         </div>
 
-        <div *ngIf="pendingTransactions.length > 0" class="space-y-3">
+        <!-- Empty state -->
+        <div *ngIf="pendingTransactions.length === 0" class="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center">
+          <ion-icon name="checkmark-circle-outline" class="text-5xl text-emerald-500 mb-3 block"></ion-icon>
+          <p class="text-slate-300 font-bold text-base">Tout est à jour !</p>
+          <p class="text-slate-500 text-xs mt-1">Aucune vente en attente de liquidation.</p>
+        </div>
+
+        <!-- Liste des transactions sélectionnables -->
+        <div class="space-y-2.5">
           <div *ngFor="let tx of pendingTransactions"
-            class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
-            <div class="flex-1 min-w-0 mr-3">
-              <p class="font-bold text-white text-sm truncate">{{ tx.senderName || 'Client Inconnu' }}</p>
-              <p class="text-xs text-slate-400 font-medium mt-1">{{ tx.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+            (click)="toggleTransaction(tx.trackingId)"
+            class="rounded-2xl border p-4 flex items-center gap-3 cursor-pointer transition-all duration-150 select-none"
+            [ngClass]="isSelected(tx.trackingId)
+              ? 'bg-indigo-900/50 border-indigo-500/60 shadow-md shadow-indigo-900/30'
+              : 'bg-slate-800 border-slate-700 hover:border-slate-500'">
+
+            <!-- Checkbox visuel -->
+            <div class="shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all"
+              [ngClass]="isSelected(tx.trackingId)
+                ? 'bg-indigo-500 border-indigo-500'
+                : 'bg-transparent border-slate-500'">
+              <svg *ngIf="isSelected(tx.trackingId)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+              </svg>
             </div>
+
+            <!-- Infos transaction -->
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-white text-sm truncate">{{ tx.senderName || 'Client' }}</p>
+              <p class="text-xs text-slate-400 font-medium mt-0.5">{{ tx.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+            </div>
+
+            <!-- Montant -->
             <div class="text-right shrink-0">
-              <p class="font-black text-emerald-400 text-base">
-                +{{ (tx.amountCredited || tx.amount || 0) | number:'1.0-0':'fr-FR' }}
-                <span class="text-xs">FCFA</span>
+              <p class="font-black text-base" [ngClass]="isSelected(tx.trackingId) ? 'text-indigo-300' : 'text-emerald-400'">
+                +{{ formatAmount(tx.amountCredited || tx.amount || 0) }}
               </p>
-              <span class="inline-block mt-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold rounded uppercase tracking-wider">
-                En attente
-              </span>
+              <p class="text-[10px] font-bold text-slate-500 mt-0.5">FCFA</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ✅ Historique des liquidations -->
+      <!-- Section: Résumé de la sélection -->
+      <div *ngIf="selectedIds.size > 0"
+        class="bg-indigo-900/30 border border-indigo-700/50 rounded-2xl p-4 mb-6">
+        <h4 class="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-3">Résumé de la Liquidation</h4>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-slate-300 text-sm font-medium">Ventes sélectionnées</span>
+          <span class="text-white font-bold text-sm">{{ selectedIds.size }}</span>
+        </div>
+        <div class="border-t border-indigo-700/50 pt-3 mt-1 flex justify-between items-center">
+          <span class="text-indigo-200 font-bold text-sm">Montant Total</span>
+          <span class="text-white font-black text-xl">{{ formatAmount(selectedTotal) }} <span class="text-indigo-300 text-sm font-bold">FCFA</span></span>
+        </div>
+      </div>
+
+      <!-- Historique des liquidations -->
       <div *ngIf="liquidationHistory.length > 0">
-        <h3 class="text-base font-bold text-white mb-4 tracking-wide">Historique des Liquidations</h3>
-        <div class="space-y-3">
+        <h3 class="text-sm font-bold text-white mb-3 uppercase tracking-wide">Historique des Liquidations</h3>
+        <div class="space-y-2.5">
           <div *ngFor="let liq of liquidationHistory"
-            class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex items-center justify-between shadow-sm">
+            class="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex items-center justify-between shadow-sm">
             <div class="flex-1 min-w-0 mr-3">
               <p class="font-bold text-white text-sm">Liquidation</p>
-              <p class="text-xs text-slate-400 font-medium mt-1">{{ liq.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
-              <p *ngIf="liq.transferReference" class="text-xs text-slate-500 mt-0.5">Réf: {{ liq.transferReference }}</p>
+              <p class="text-xs text-slate-400 font-medium mt-0.5">{{ liq.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+              <p *ngIf="liq.transferReference" class="text-xs text-slate-500 mt-0.5 font-mono">Réf: {{ liq.transferReference }}</p>
             </div>
             <div class="text-right shrink-0">
               <p class="font-black text-white text-base">
-                {{ liq.amountToLiquidate | number:'1.0-0':'fr-FR' }}
-                <span class="text-xs text-slate-400">FCFA</span>
+                {{ formatAmount(liq.amountToLiquidate) }}
+                <span class="text-xs text-slate-400"> FCFA</span>
               </p>
-              <span class="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider border"
+              <span class="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider border"
                 [ngClass]="{
                   'bg-amber-500/10 text-amber-400 border-amber-500/20': liq.status === 'EN_ATTENTE',
                   'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': liq.status === 'VALIDEE',
@@ -124,13 +182,12 @@
   </div>
 </ion-content>
 
-<!-- ✅ MODAL REÇU DE LIQUIDATION -->
-<ion-modal [isOpen]="showReceipt" (didDismiss)="closeReceipt()" [breakpoints]="[0, 0.75]" [initialBreakpoint]="0.75">
+<!-- MODAL REÇU DE LIQUIDATION -->
+<ion-modal [isOpen]="showReceipt" (didDismiss)="closeReceipt()" [breakpoints]="[0, 0.8]" [initialBreakpoint]="0.8">
   <ng-template>
     <ion-content class="bg-slate-900">
       <div class="px-6 pt-6 pb-8">
 
-        <!-- Header reçu -->
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center border border-emerald-500/30">
@@ -141,35 +198,26 @@
               <p class="text-xs text-emerald-400 font-bold">Demande envoyée ✅</p>
             </div>
           </div>
-          <button (click)="closeReceipt()"
-            class="w-9 h-9 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700">
-            <ion-icon name="close-circle-outline" class="text-slate-400 text-xl"></ion-icon>
+          <button (click)="closeReceipt()" class="w-9 h-9 bg-slate-800 rounded-full flex items-center justify-center border border-slate-700">
+            <ion-icon name="close-outline" class="text-slate-400 text-xl"></ion-icon>
           </button>
         </div>
 
-        <!-- Corps du reçu -->
         <div *ngIf="lastLiquidation" class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden mb-6">
-
-          <!-- Montant central -->
-          <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-center">
+          <div class="bg-gradient-to-br from-indigo-700 to-blue-800 p-6 text-center">
             <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1">Montant demandé</p>
-            <h3 class="text-4xl font-black text-white">
-              {{ lastLiquidation.amountToLiquidate | number:'1.0-0':'fr-FR' }}
-            </h3>
+            <h3 class="text-4xl font-black text-white">{{ formatAmount(lastLiquidation.amountToLiquidate) }}</h3>
             <p class="text-blue-200 font-bold text-lg">FCFA</p>
           </div>
 
-          <!-- Détails -->
-          <div class="p-5 space-y-4">
+          <div class="p-5 space-y-3">
             <div class="flex justify-between items-center py-2 border-b border-slate-700">
               <span class="text-sm text-slate-400 font-medium">Boutique</span>
               <span class="text-sm font-bold text-white">{{ lastLiquidation.boutiqueName || boutiqueName }}</span>
             </div>
             <div class="flex justify-between items-center py-2 border-b border-slate-700">
-              <span class="text-sm text-slate-400 font-medium">Date de demande</span>
-              <span class="text-sm font-bold text-white">
-                {{ lastLiquidation.createdAt | date:'dd/MM/yyyy HH:mm' }}
-              </span>
+              <span class="text-sm text-slate-400 font-medium">Date</span>
+              <span class="text-sm font-bold text-white">{{ lastLiquidation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <div class="flex justify-between items-center py-2 border-b border-slate-700">
               <span class="text-sm text-slate-400 font-medium">Statut</span>
@@ -184,23 +232,21 @@
           </div>
         </div>
 
-        <!-- Message banque -->
         <div class="bg-blue-900/30 border border-blue-700/40 rounded-2xl p-4 mb-6">
           <div class="flex items-start gap-3">
             <ion-icon name="wallet-outline" class="text-blue-400 text-xl mt-0.5 shrink-0"></ion-icon>
             <div>
               <p class="text-sm font-bold text-blue-300">À présenter à la banque</p>
               <p class="text-xs text-blue-400 mt-1">
-                Conservez ce reçu. Il sera validé par l'administrateur GNS et les fonds seront transférés sur votre compte bancaire enregistré.
+                Votre demande sera validée par l'administrateur GNS puis les fonds seront transférés sur votre compte bancaire.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Bouton fermer -->
         <button (click)="closeReceipt()"
-          class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl
-                 shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+          class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl
+                 shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2">
           <ion-icon name="checkmark-circle-outline" class="text-xl"></ion-icon>
           <span>Compris, fermer</span>
         </button>

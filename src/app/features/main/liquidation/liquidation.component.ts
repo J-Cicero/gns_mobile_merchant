@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, ViewWillEnter } from '@ionic/angular';
 import { MerchantService } from '../../../core/services/merchant.service';
 import { TransactionService } from '../../../core/services/transaction.service';
@@ -10,7 +11,8 @@ import { Page } from '../../../core/models/page.model';
 import { addIcons } from 'ionicons';
 import {
   walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline,
-  documentTextOutline, printOutline, closeOutline
+  documentTextOutline, closeOutline, cashOutline, checkboxOutline,
+  squareOutline, chevronForwardOutline, trendingUpOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -18,22 +20,25 @@ import {
   templateUrl: './liquidation.component.html',
   styleUrls: ['./liquidation.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule]
+  imports: [CommonModule, IonicModule, FormsModule]
 })
 export class LiquidationComponent implements OnInit, ViewWillEnter {
 
-  montantDisponible: number = 0;
+  boutiqueBalance: number = 0;
   boutiqueName: string = '';
+  
+  /** Toutes les ventes non encore liquidées (retrievedByBoutique == false) */
   pendingTransactions: TransactionResponse[] = [];
+  
+  /** IDs des transactions sélectionnées par le marchand */
+  selectedIds: Set<string> = new Set();
+  
   isLoading = true;
   isSubmitting = false;
   selectedBoutiqueId: string | null = null;
 
-  // ✅ Reçu après liquidation réussie
   showReceipt: boolean = false;
   lastLiquidation: LiquidationResponse | null = null;
-
-  // Historique des liquidations de la boutique
   liquidationHistory: LiquidationResponse[] = [];
 
   constructor(
@@ -44,14 +49,15 @@ export class LiquidationComponent implements OnInit, ViewWillEnter {
   ) {
     addIcons({
       walletOutline, timeOutline, checkmarkCircleOutline, alertCircleOutline,
-      documentTextOutline, printOutline, closeOutline
+      documentTextOutline, closeOutline, cashOutline, checkboxOutline,
+      squareOutline, chevronForwardOutline, trendingUpOutline
     });
   }
 
   ngOnInit() {
     this.selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
     if (this.selectedBoutiqueId) {
-      this.loadLiquidationData();
+      this.loadData();
     } else {
       this.isLoading = false;
     }
@@ -60,36 +66,29 @@ export class LiquidationComponent implements OnInit, ViewWillEnter {
   ionViewWillEnter() {
     this.selectedBoutiqueId = this.merchantService.getSelectedBoutiqueId();
     if (this.selectedBoutiqueId) {
-      this.loadLiquidationData();
+      this.loadData();
     }
   }
 
-  loadLiquidationData() {
+  loadData() {
     this.isLoading = true;
+    this.selectedIds.clear();
 
     this.merchantService.getBoutiqueById(this.selectedBoutiqueId!).subscribe({
       next: (boutique) => {
-        // ✅ Corriger le mapping du solde (même pattern que le dashboard)
-        this.montantDisponible = Number((boutique as any).solde ?? boutique.balance) || 0;
+        this.boutiqueBalance = Number((boutique as any).solde ?? boutique.balance) || 0;
         this.boutiqueName = boutique.name || '';
-
-        console.log('[Liquidation] Solde boutique:', this.montantDisponible, 'FCFA');
-
-        // Charger l'historique des liquidations
         this.loadLiquidationHistory();
 
-        // Charger les transactions non liquidées
-        this.transactionService.getSalesHistory(this.selectedBoutiqueId!, 0, 20).subscribe({
+        this.transactionService.getSalesHistory(this.selectedBoutiqueId!, 0, 100).subscribe({
           next: (res: Page<TransactionResponse>) => {
-            // Transactions VALIDE et non encore liquidées
+            // Transactions VALIDE non encore liquidées (retrievedByBoutique == false ou absent)
             this.pendingTransactions = (res.content || []).filter(
-              tx => tx.status === 'VALIDE' && (!tx.isCommissionPaid || (tx.isCommissionPaid as any) === null)
+              (tx: any) => tx.status === 'VALIDE' && !(tx.retrievedByBoutique)
             );
             this.isLoading = false;
           },
-          error: () => {
-            this.isLoading = false;
-          }
+          error: () => { this.isLoading = false; }
         });
       },
       error: () => {
@@ -103,37 +102,65 @@ export class LiquidationComponent implements OnInit, ViewWillEnter {
     if (!this.selectedBoutiqueId) return;
     this.liquidationService.findByBoutiqueId(this.selectedBoutiqueId).subscribe({
       next: (res: any) => {
-        // Peut être un tableau ou un objet Page
-        if (res && res.content) {
-          this.liquidationHistory = res.content;
-        } else if (Array.isArray(res)) {
-          this.liquidationHistory = res;
-        } else {
-          this.liquidationHistory = [];
-        }
+        if (res && res.content) this.liquidationHistory = res.content;
+        else if (Array.isArray(res)) this.liquidationHistory = res;
+        else this.liquidationHistory = [];
       },
-      error: () => {
-        this.liquidationHistory = [];
-      }
+      error: () => { this.liquidationHistory = []; }
     });
   }
 
+  toggleSelectAll() {
+    if (this.allSelected) {
+      this.selectedIds.clear();
+    } else {
+      this.pendingTransactions.forEach(tx => this.selectedIds.add(tx.trackingId));
+    }
+  }
+
+  toggleTransaction(txId: string) {
+    if (this.selectedIds.has(txId)) {
+      this.selectedIds.delete(txId);
+    } else {
+      this.selectedIds.add(txId);
+    }
+  }
+
+  isSelected(txId: string): boolean {
+    return this.selectedIds.has(txId);
+  }
+
+  get allSelected(): boolean {
+    return this.pendingTransactions.length > 0 && this.selectedIds.size === this.pendingTransactions.length;
+  }
+
+  get selectedTransactions(): TransactionResponse[] {
+    return this.pendingTransactions.filter(tx => this.selectedIds.has(tx.trackingId));
+  }
+
+  get selectedTotal(): number {
+    return this.selectedTransactions.reduce((sum, tx) => sum + ((tx as any).amountCredited || tx.amount || 0), 0);
+  }
+
+  get totalPending(): number {
+    return this.pendingTransactions.reduce((sum, tx) => sum + ((tx as any).amountCredited || tx.amount || 0), 0);
+  }
+
   requestLiquidation() {
-    if (this.montantDisponible <= 0 || !this.selectedBoutiqueId) return;
+    if (this.selectedIds.size === 0 || !this.selectedBoutiqueId) return;
 
     this.isSubmitting = true;
     const request: LiquidationRequest = {
-      amountToLiquidate: this.montantDisponible,
+      amountToLiquidate: this.selectedTotal,
       boutiqueTrackingId: this.selectedBoutiqueId
     };
 
     this.merchantService.requestLiquidation(request).subscribe({
       next: (response: LiquidationResponse) => {
         this.isSubmitting = false;
-        // ✅ Stocker la réponse et afficher le reçu
         this.lastLiquidation = response;
         this.showReceipt = true;
-        this.loadLiquidationData();
+        this.loadData();
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -142,26 +169,19 @@ export class LiquidationComponent implements OnInit, ViewWillEnter {
     });
   }
 
-  closeReceipt() {
-    this.showReceipt = false;
-  }
+  closeReceipt() { this.showReceipt = false; }
 
   async showToast(message: string, color: 'success' | 'danger' | 'warning') {
     const toast = await this.toastController.create({
-      message,
-      duration: 3000,
-      color,
-      position: 'top',
+      message, duration: 3000, color, position: 'top',
       buttons: [{ icon: 'close', role: 'cancel' }]
     });
     toast.present();
   }
 
   doRefresh(event: any) {
-    this.loadLiquidationData();
-    setTimeout(() => {
-      event.target.complete();
-    }, 1200);
+    this.loadData();
+    setTimeout(() => event.target.complete(), 1200);
   }
 
   getStatusLabel(status: string): string {
@@ -173,12 +193,8 @@ export class LiquidationComponent implements OnInit, ViewWillEnter {
     }
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'EN_ATTENTE': return 'amber';
-      case 'VALIDEE': return 'emerald';
-      case 'REJETEE': return 'red';
-      default: return 'slate';
-    }
+  formatAmount(value: number): string {
+    return new Intl.NumberFormat('fr-FR').format(value || 0);
   }
 }
+

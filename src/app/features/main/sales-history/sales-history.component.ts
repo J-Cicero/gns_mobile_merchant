@@ -66,7 +66,7 @@ export class SalesHistoryComponent implements OnInit, ViewWillEnter {
     this.isLoading = true;
     this.transactionService.getSalesHistory(this.boutiqueId, this.currentPage, 20).subscribe({
       next: (res: Page<TransactionResponse>) => {
-        // Filter: only VALIDE transactions that are NOT yet liquidated (isCommissionPaid = false means not yet settled)
+        // Affiche toutes les transactions validées (retrievedByBoutique indique si elles ont déjà été liquidées)
         const filtered = (res.content || []).filter(tx => tx.status === TransactionStatut.VALIDE);
         this.transactions = [...this.transactions, ...filtered];
         this.totalPages = res.totalPages || 1;
@@ -91,15 +91,13 @@ export class SalesHistoryComponent implements OnInit, ViewWillEnter {
 
   get totalNonLiquidated(): number {
     const sum = this.transactions
-      .filter(tx => !tx.isCommissionPaid || (tx.isCommissionPaid as any) === null)
+      .filter(tx => !tx.retrievedByBoutique)
       .reduce((s, tx) => s + (Number(tx.amountCredited) || Number(tx.amount) || 0), 0);
-    
     return sum > 0 ? sum : (this.boutiqueSolde || 0);
   }
 
   get nonLiquidatedList(): TransactionResponse[] {
-    // ✅ Inclure les transactions où isCommissionPaid est null ou false
-    return this.transactions.filter(tx => !tx.isCommissionPaid || (tx.isCommissionPaid as any) === null);
+    return this.transactions.filter(tx => !tx.retrievedByBoutique);
   }
 
   get hasMore(): boolean {

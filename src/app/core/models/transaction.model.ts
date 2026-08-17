@@ -8,10 +8,8 @@ export enum TransactionStatut {
 export interface TransactionRequest {
   senderTrackingId: string;
   receiverTrackingId: string;
-  amount: number; // BigDecimal from backend -> number
-  transactionPin?: string; // String from backend
-  isCommissionPaid?: boolean; // Boolean from backend
-  isRetry?: boolean; // Boolean from backend
+  amount: number;
+  transactionPin?: string;
 }
 
 export interface TransactionResponse {
@@ -20,14 +18,14 @@ export interface TransactionResponse {
   receiverTrackingId: string;
   senderName: string;
   receiverName: string;
-  amount: number; // BigDecimal from backend -> number
-  amountDebited: number; // BigDecimal from backend -> number
-  amountCredited: number; // BigDecimal from backend -> number
-  totalCommission: number; // BigDecimal from backend -> number
-  gnsCommission: number; // BigDecimal from backend -> number
-  bankCommission: number; // BigDecimal from backend -> number
-  isCommissionPaid: boolean;
-  isRetry: boolean;
+  amount: number;
+  amountDebited: number;
+  amountCredited: number;
+  totalCommission: number;
+  gnsCommission: number;
+  bankCommission: number;
+  retrievedByBoutique: boolean;
+  deductedFromStudentBourse: boolean;
   status: TransactionStatut;
-  createdAt: string; // LocalDateTime from backend -> string
+  createdAt: string;
 }

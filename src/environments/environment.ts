@@ -1,5 +1,5 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://gns-production.up.railway.app/api'
+  apiUrl: 'http://localhost:8080/api'
 };
