@@ -85,7 +85,7 @@
         
         <div>
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Banque</label>
-          <select [(ngModel)]="registrationData.bankTrackingId" name="bankTrackingId" required
+          <select [(ngModel)]="registrationData.bankTrackingId" (ngModelChange)="saveState()" name="bankTrackingId" required
             class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all">
             <option value="" disabled selected>Sélectionner une banque</option>
             <option *ngFor="let banque of banques" [value]="banque.trackingId">{{ banque.name }}</option>
@@ -94,16 +94,44 @@
 
         <div *ngIf="registrationData.bankTrackingId">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Numéro de Compte</label>
-          <input type="text" [(ngModel)]="registrationData.accountNumber" name="accountNumber" required
+          <input type="text" [(ngModel)]="registrationData.accountNumber" (ngModelChange)="saveState()" name="accountNumber" required
             class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all placeholder-slate-400" 
             placeholder="Ex: 0123456789">
         </div>
 
-        <div *ngIf="registrationData.bankTrackingId">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Relevé d'Identité Bancaire (RIB)</label>
-          <input type="file" (change)="onRibSelected($event)" accept=".pdf,image/*" required
-            class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 dark:file:bg-indigo-900/30 file:text-indigo-600 dark:file:text-indigo-400 hover:file:bg-indigo-100">
-          <p class="text-xs text-slate-400 mt-2 ml-1">Format accepté: PDF ou Image (JPG/PNG)</p>
+        <div *ngIf="registrationData.bankTrackingId" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Relevé d'Identité Bancaire (RIB)</label>
+            <span *ngIf="ribFile" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Prêt</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <label class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs cursor-pointer border border-indigo-200 transition-all text-center">
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Prendre photo</span>
+              <input type="file" (change)="onRibSelected($event)" accept="image/*" capture="environment" class="hidden">
+            </label>
+
+            <label class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer border border-slate-200 transition-all text-center">
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 013 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span>Fichier / PDF</span>
+              <input type="file" (change)="onRibSelected($event)" accept="image/*,application/pdf,.pdf" class="hidden">
+            </label>
+          </div>
+
+          <div *ngIf="ribFile" class="flex items-center gap-3 p-2.5 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/80 dark:border-slate-700">
+            <img *ngIf="ribPreviewUrl" [src]="ribPreviewUrl" alt="Aperçu RIB" class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">
+            <div *ngIf="!ribPreviewUrl" class="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs shrink-0">PDF</div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{{ ribFile.name }}</p>
+              <p class="text-[11px] text-emerald-600 font-semibold">RIB enregistré</p>
+            </div>
+          </div>
         </div>
       </div>
 
