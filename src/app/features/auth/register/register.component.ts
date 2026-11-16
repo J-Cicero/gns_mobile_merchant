@@ -26,6 +26,8 @@ export class RegisterComponent implements OnInit {
     password: '',
     birthDate: '',
     birthPlace: '',
+    businessName: '',
+    registrationNumber: '',
     bankTrackingId: '',
     accountNumber: ''
   };
@@ -191,6 +193,10 @@ export class RegisterComponent implements OnInit {
       this.currentStep = 2;
       this.saveState();
     } else if (this.currentStep === 2) {
+      if (!this.registrationData.businessName) {
+        this.errorMessage = 'Veuillez renseigner le nom de votre boutique / commerce.';
+        return;
+      }
       // Si la banque est remplie, vérifier que le numéro de compte et le RIB sont présents
       if (this.registrationData.bankTrackingId && (!this.registrationData.accountNumber || !this.ribFile)) {
         this.errorMessage = 'Veuillez fournir un numéro de compte et le fichier RIB.';

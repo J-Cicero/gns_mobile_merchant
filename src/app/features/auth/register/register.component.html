@@ -78,10 +78,26 @@
         </div>
       </div>
 
-      <!-- STEP 2: Bank Info & RIB -->
+      <!-- STEP 2: Boutique & Bank Info -->
       <div *ngIf="currentStep === 2" class="space-y-5 fade-in">
-        <h3 class="text-lg font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-4">Informations Bancaires</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Nécessaire pour recevoir vos paiements directement sur votre compte.</p>
+        <h3 class="text-lg font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-4">Votre Commerce / Boutique</h3>
+        
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Nom de la Boutique / Commerce *</label>
+          <input type="text" [(ngModel)]="registrationData.businessName" (ngModelChange)="saveState()" name="businessName" required
+            class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all placeholder-slate-400" 
+            placeholder="Ex: Cafétéria Campus, Librairie Centrale...">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Numéro RCCM / NIF (Optionnel)</label>
+          <input type="text" [(ngModel)]="registrationData.registrationNumber" (ngModelChange)="saveState()" name="registrationNumber"
+            class="w-full px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all placeholder-slate-400" 
+            placeholder="Ex: TG-LOM-2024-B-0123">
+        </div>
+
+        <h3 class="text-lg font-bold border-b border-slate-200 dark:border-slate-700 pb-2 mb-4 mt-6">Compte de Liquidation Bancaire</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Sélectionnez la banque où virer automatiquement vos encaissements.</p>
         
         <div>
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Banque</label>

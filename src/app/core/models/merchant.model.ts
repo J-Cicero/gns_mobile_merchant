@@ -7,6 +7,8 @@ export interface MerchantRequest {
   phoneNumber: string;
   birthDate?: string;
   birthPlace?: string;
+  businessName?: string;
+  registrationNumber?: string;
   bankTrackingId?: string;
   accountNumber?: string;
 }

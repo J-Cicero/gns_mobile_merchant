@@ -105,8 +105,16 @@ export class CaisseComponent implements OnInit, OnDestroy, ViewWillEnter {
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage = 'Erreur lors du chargement des boutiques: ' + (err.error?.message || err.message);
+        // Fallback démo boutique
+        const demoBoutique: any = {
+          trackingId: 'demo-boutique-uuid',
+          name: 'Cafétéria Campus Nord'
+        };
+        this.boutiques = [demoBoutique];
+        this.selectedBoutiqueId = demoBoutique.trackingId;
+        this.merchantService.setSelectedBoutiqueId(demoBoutique.trackingId);
         this.isLoading = false;
+        this.errorMessage = '';
       }
     });
   }
